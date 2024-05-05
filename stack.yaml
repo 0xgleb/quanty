@@ -1,0 +1,10 @@
+resolver: lts-22.20
+
+# This uses GHC from $PATH and $PATH is set to use the Nix GHC in flake.nix
+system-ghc: true
+install-ghc: false
+
+packages:
+  - .
+
+extra-deps: []

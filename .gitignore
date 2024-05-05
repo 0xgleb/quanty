@@ -1,2 +1,4 @@
 .devenv
 .direnv
+.stack-work
+*.cabal
