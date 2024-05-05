@@ -1,6 +1,6 @@
-name: quanting
+name: quanty
 version: 0.1.0.0
-github: "0xgleb/quanting"
+github: "0xgleb/quanty"
 license: BSD3
 author: "Author name here"
 maintainer: "example@example.com"
@@ -9,9 +9,10 @@ copyright: "2024 Author name here"
 dependencies:
   - base >= 4.14.4.0 && < 5
   - protolude
+  - hspec
 
-executables:
-  options-exe:
+tests:
+  options-tests:
     main: OptionsPricing.hs
     source-dirs: .
     ghc-options:
@@ -59,6 +60,8 @@ default-extensions:
   - TupleSections
   - TypeApplications
   - TypeFamilyDependencies # Implies: TypeFamilies
-  - TypeInType # Implies: DataKinds, KindSignatures, PolyKinds
+  - DataKinds
+  - KindSignatures
+  - PolyKinds
   - TypeOperators
   - ViewPatterns

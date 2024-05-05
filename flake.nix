@@ -26,7 +26,11 @@
             inherit inputs pkgs;
             modules = [{
               # https://devenv.sh/reference/options/
-              packages = with pkgs; [ haskellPackages.fourmolu hlint ];
+              packages = with pkgs.haskellPackages; [
+                haskell-language-server
+                fourmolu
+                hlint
+              ];
               languages.haskell.enable = true;
             }];
           };
