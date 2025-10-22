@@ -10,6 +10,26 @@ dependencies:
   - base >= 4.14.4.0 && < 5
   - protolude
   - hspec
+  - servant
+  - servant-server
+  - warp
+  - aeson
+  - text
+
+executables:
+  quanty-server:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+      - -O2
+    dependencies:
+      - quanty
+
+library:
+  source-dirs: src
 
 tests:
   options-tests:
