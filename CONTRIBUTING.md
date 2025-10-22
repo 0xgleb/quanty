@@ -74,24 +74,26 @@ Thank you for your interest in contributing to Quanty! This document provides gu
 
 ### Code Style
 
+All code formatting is managed through Nix-provided tools. The pre-commit hooks will automatically format your code.
+
 #### Haskell
 
-- Use [fourmolu](https://github.com/fourmolu/fourmolu) for formatting (configuration in `fourmolu.yaml`)
-- Follow the [HLint](https://github.com/ndmitchell/hlint) suggestions (configuration in `.hlint.yaml`)
+- **Fourmolu** for formatting (configuration in `fourmolu.yaml`)
+- **HLint** for linting (configuration in `.hlint.yaml`)
 - Write meaningful type signatures
 - Use explicit module exports
 - Add documentation for public functions
 
 #### Frontend (TypeScript/Svelte)
 
-- Use [Prettier](https://prettier.io/) for formatting (configuration in `frontend/.prettierrc`)
+- **Prettier** for formatting (configuration in `frontend/.prettierrc`)
 - Follow TypeScript best practices
 - Use meaningful variable and function names
 - Add JSDoc comments for complex functions
 
 #### Nix
 
-- Use [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt) for formatting
+- **nixpkgs-fmt** for formatting
 - Keep expressions readable and well-documented
 
 ### Running Tests
@@ -145,20 +147,21 @@ If a hook fails, fix the issues and try committing again.
 
 ## CI/CD
 
-All pull requests must pass the following checks:
+All pull requests must pass the following checks (all managed through Nix):
 
-- ✅ Haskell code formatting (fourmolu)
-- ✅ Haskell linting (hlint)
-- ✅ Haskell tests
-- ✅ Frontend type checking
+- ✅ Nix flake checks
+- ✅ Haskell build and tests
 - ✅ Frontend build
-- ✅ Nix formatting
+- ✅ Code formatting (Fourmolu for Haskell, Prettier for frontend, nixpkgs-fmt for Nix)
+- ✅ Haskell linting (HLint)
 
 You can run all checks locally with:
 
 ```bash
 make check
 ```
+
+All CI dependencies are managed by Nix, ensuring consistency between local development and CI environments.
 
 ## Pull Request Process
 

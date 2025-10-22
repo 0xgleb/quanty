@@ -130,14 +130,16 @@ make dev-frontend      # Start frontend development server
 
 ### CI/CD
 
-This project uses GitHub Actions for continuous integration. The following checks run on every push and pull request:
+This project uses GitHub Actions for continuous integration. All CI jobs use Nix to manage dependencies consistently.
 
-1. **Haskell Checks**: Build and test the Haskell backend
-2. **Haskell Formatting**: Ensure Haskell code is properly formatted with Fourmolu
-3. **Haskell Linting**: Check code quality with HLint
-4. **Frontend Checks**: Type-check and build the frontend
-5. **Nix Formatting**: Ensure Nix files are properly formatted
-6. **Pre-commit Hooks**: Run all pre-commit hooks via Nix flake checks
+The following checks run on every push and pull request:
+
+1. **Nix Flake Checks**: Validate the entire Nix flake configuration
+2. **Build and Test**: Build Haskell backend, run tests, and build frontend
+3. **Format Check**: Verify code formatting (Fourmolu for Haskell, Prettier for frontend, nixpkgs-fmt for Nix)
+4. **Lint**: Run HLint on Haskell code
+
+All tools and dependencies are provided by the Nix development environment.
 
 ### Running Checks Locally
 
