@@ -1,0 +1,19 @@
+# HLint configuration file
+# https://github.com/ndmitchell/hlint
+
+- ignore: {name: "Use camelCase"}
+- ignore: {name: "Redundant do"}
+- ignore: {name: "Use newtype instead of data"}
+
+- warn: {name: Use explicit module export lists}
+
+# Ignore some builtin hints
+- ignore: {name: "Use <$>"}
+
+# Custom hints for the project
+- group:
+    name: quanty-specific
+    enabled: true
+
+# Allow qualified imports
+- ignore: {name: "Use fewer imports"}

@@ -92,6 +92,65 @@ npm run build
 npm run preview
 ```
 
+## Development Workflow
+
+### Git Hooks
+
+This project uses pre-commit hooks to ensure code quality. The hooks are automatically installed when you enter the Nix development shell:
+
+```bash
+nix develop
+```
+
+The following hooks are configured:
+- **fourmolu**: Format Haskell code
+- **hlint**: Lint Haskell code
+- **nixpkgs-fmt**: Format Nix files
+- **prettier**: Format frontend code (JavaScript, TypeScript, Svelte)
+- **trailing-whitespace**: Remove trailing whitespace
+- **end-of-file-fixer**: Ensure files end with a newline
+
+### Makefile Commands
+
+The project includes a Makefile with helpful commands:
+
+```bash
+make help              # Show available commands
+make install-hooks     # Install git pre-commit hooks
+make format            # Auto-format all code
+make check-format      # Check formatting without modifying files
+make lint              # Run linters
+make test              # Run all tests
+make build             # Build both backend and frontend
+make check             # Run all checks (format, lint, test)
+make clean             # Clean build artifacts
+make dev-backend       # Start backend development server
+make dev-frontend      # Start frontend development server
+```
+
+### CI/CD
+
+This project uses GitHub Actions for continuous integration. The following checks run on every push and pull request:
+
+1. **Haskell Checks**: Build and test the Haskell backend
+2. **Haskell Formatting**: Ensure Haskell code is properly formatted with Fourmolu
+3. **Haskell Linting**: Check code quality with HLint
+4. **Frontend Checks**: Type-check and build the frontend
+5. **Nix Formatting**: Ensure Nix files are properly formatted
+6. **Pre-commit Hooks**: Run all pre-commit hooks via Nix flake checks
+
+### Running Checks Locally
+
+Before pushing your changes, you can run all checks locally:
+
+```bash
+# Using Makefile
+make check
+
+# Or using Nix flakes
+nix flake check
+```
+
 ## License
 
 BSD3

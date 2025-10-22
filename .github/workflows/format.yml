@@ -1,0 +1,51 @@
+name: Format Code
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'claude/**'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: Auto-format Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Format Haskell code with Fourmolu
+        run: |
+          nix-shell -p haskellPackages.fourmolu --run "fourmolu --mode inplace app/ src/ OptionsPricing.hs" || true
+
+      - name: Format Nix code
+        run: |
+          nix-shell -p nixpkgs-fmt --run "nixpkgs-fmt *.nix" || true
+
+      - name: Format frontend code with Prettier
+        run: |
+          cd frontend
+          npm install -D prettier
+          npx prettier --write "src/**/*.{js,ts,svelte,json,css,html}" || true
+
+      - name: Commit formatted code
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: auto-format code'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
