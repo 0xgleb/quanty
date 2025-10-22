@@ -9,10 +9,7 @@
 
   onMount(async () => {
     try {
-      const [healthRes, infoRes] = await Promise.all([
-        fetch('/health'),
-        fetch('/api/info')
-      ]);
+      const [healthRes, infoRes] = await Promise.all([fetch('/health'), fetch('/api/info')]);
 
       if (healthRes.ok && infoRes.ok) {
         health = await healthRes.json();
@@ -28,25 +25,23 @@
   });
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+<div
+  class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8"
+>
   <div class="max-w-4xl mx-auto space-y-8">
     <div class="text-center space-y-4">
-      <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-50">
-        Quanty
-      </h1>
-      <p class="text-xl text-slate-600 dark:text-slate-400">
-        Quantitative Finance Platform
-      </p>
+      <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-50">Quanty</h1>
+      <p class="text-xl text-slate-600 dark:text-slate-400">Quantitative Finance Platform</p>
     </div>
 
     <div class="grid md:grid-cols-2 gap-6">
       <Card class="p-6 space-y-4">
-        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">
-          Server Health
-        </h2>
+        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">Server Health</h2>
         {#if loading}
           <div class="flex items-center justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"></div>
+            <div
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"
+            ></div>
           </div>
         {:else if error}
           <div class="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -64,12 +59,12 @@
       </Card>
 
       <Card class="p-6 space-y-4">
-        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">
-          API Information
-        </h2>
+        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">API Information</h2>
         {#if loading}
           <div class="flex items-center justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"></div>
+            <div
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"
+            ></div>
           </div>
         {:else if error}
           <div class="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -96,9 +91,7 @@
 
     <Card class="p-8">
       <div class="space-y-4">
-        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">
-          Getting Started
-        </h2>
+        <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-200">Getting Started</h2>
         <p class="text-slate-600 dark:text-slate-400">
           This is a placeholder application built with:
         </p>
@@ -109,14 +102,20 @@
         </ul>
         <div class="mt-6 p-4 bg-slate-100 dark:bg-slate-800 rounded-md">
           <p class="text-sm text-slate-600 dark:text-slate-400">
-            The backend server is running on <code class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">http://localhost:8080</code>
+            The backend server is running on <code
+              class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">http://localhost:8080</code
+            >
           </p>
-          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
-            Available endpoints:
-          </p>
+          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">Available endpoints:</p>
           <ul class="text-sm text-slate-600 dark:text-slate-400 ml-4 mt-2 space-y-1">
-            <li><code class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">GET /health</code> - Health check</li>
-            <li><code class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">GET /api/info</code> - API information</li>
+            <li>
+              <code class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">GET /health</code> - Health
+              check
+            </li>
+            <li>
+              <code class="px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded">GET /api/info</code> - API
+              information
+            </li>
           </ul>
         </div>
       </div>

@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 
-module Api
-  ( API
-  , server
-  , api
-  ) where
+module Api (
+  API,
+  server,
+  api,
+) where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Proxy (Proxy (..))
@@ -21,6 +21,8 @@ data HealthResponse = HealthResponse
 
 
 instance ToJSON HealthResponse
+
+
 instance FromJSON HealthResponse
 
 
@@ -33,6 +35,8 @@ data InfoResponse = InfoResponse
 
 
 instance ToJSON InfoResponse
+
+
 instance FromJSON InfoResponse
 
 
@@ -47,20 +51,20 @@ api = Proxy
 
 server :: Server API
 server = healthHandler :<|> infoHandler
- where
-  healthHandler :: Handler HealthResponse
-  healthHandler =
-    return $
-      HealthResponse
-        { status = "ok"
-        , message = "Server is running"
-        }
+  where
+    healthHandler :: Handler HealthResponse
+    healthHandler =
+      return $
+        HealthResponse
+          { status = "ok"
+          , message = "Server is running"
+          }
 
-  infoHandler :: Handler InfoResponse
-  infoHandler =
-    return $
-      InfoResponse
-        { name = "Quanty API"
-        , version = "0.1.0"
-        , description = "A placeholder API for quantitative finance"
-        }
+    infoHandler :: Handler InfoResponse
+    infoHandler =
+      return $
+        InfoResponse
+          { name = "Quanty API"
+          , version = "0.1.0"
+          , description = "A placeholder API for quantitative finance"
+          }
