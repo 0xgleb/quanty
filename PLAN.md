@@ -149,7 +149,7 @@ directories. This improves developer experience and makes automation easier.
 
 ### Subtasks
 
-- [ ] Create root `package.json` with workspace configuration:
+- [x] Create root `package.json` with workspace configuration:
   ```json
   {
     "name": "quanty",
@@ -167,12 +167,12 @@ directories. This improves developer experience and makes automation easier.
     }
   }
   ```
-- [ ] Create `pnpm-workspace.yaml` at project root:
+- [x] Create `pnpm-workspace.yaml` at project root:
   ```yaml
   packages:
     - "frontend"
   ```
-- [ ] Verify workspace setup with `pnpm -r list` (should show frontend
+- [x] Verify workspace setup with `pnpm -r list` (should show frontend
       workspace)
 
 **Expected Project Structure After**:
