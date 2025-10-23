@@ -18,6 +18,8 @@ dependencies:
   - time
   - text
 
+language: GHC2021
+
 library:
   source-dirs: src
 
@@ -55,35 +57,20 @@ ghc-options:
   - -Wredundant-constraints
 
 default-extensions:
+  # Extensions NOT in GHC2021 that we use
   - ApplicativeDo
   - BlockArguments
-  - ConstraintKinds
+  - DataKinds
   - DeriveAnyClass
-  - DeriveGeneric
-  - DeriveLift
-  - DeriveTraversable # Implies: DeriveFoldable, DeriveFunctor
-  - DerivingVia # Implies: DerivingStrategies
-  - FlexibleContexts
-  - GADTs
-  - GeneralizedNewtypeDeriving
-  - ImportQualifiedPost
-  - InstanceSigs
+  - DerivingVia
   - LambdaCase
-  - MultiParamTypeClasses
-  - NamedFieldPuns
   - NoImplicitPrelude
-  - NoStarIsType
   - OverloadedStrings
   - QuasiQuotes
-  - RankNTypes # Implies: ExplicitForAll
-  - RecordWildCards # Implies: DisambiguateRecordFields
-  - ScopedTypeVariables # Implies: ExplicitForAll
-  - StandaloneDeriving
-  - TupleSections
-  - TypeApplications
-  - TypeFamilyDependencies # Implies: TypeFamilies
-  - DataKinds
-  - KindSignatures
-  - PolyKinds
-  - TypeOperators
+  - RecordWildCards
+  - TypeFamilyDependencies
   - ViewPatterns
+  # Modern record handling
+  - DuplicateRecordFields
+  - NoFieldSelectors
+  - OverloadedRecordDot

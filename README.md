@@ -134,13 +134,27 @@ pnpm format              # Format code
 
 ### Code Quality
 
-Pre-commit hooks automatically run on staged files:
+Pre-commit hooks (configured in `flake.nix`) automatically run on staged files:
 
 - **fourmolu**: Haskell formatting
 - **hlint**: Haskell linting
 - **prettier**: Frontend formatting
 - **eslint**: Frontend linting
 - **nixfmt**: Nix file formatting
+
+**Manual usage**:
+
+```bash
+pre-commit run -a           # Run all hooks on all files
+pre-commit run fourmolu     # Run specific hook
+pre-commit run --files src/Api.hs  # Run on specific file
+```
+
+Hooks run automatically on `git commit`. To bypass (not recommended):
+
+```bash
+git commit --no-verify
+```
 
 ## Documentation
 

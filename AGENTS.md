@@ -39,6 +39,12 @@ Stack is configured to use `system-ghc: true` to use the GHC from Nix.
 
 ## Plan & Review
 
+### When to create a plan
+
+Create a plan for feature implementations and multi-step GitHub issues. Do NOT
+create a plan when the user asks you to do a change rather than to plan a
+change.
+
 ### Before starting work
 
 - Write a comprehensive step-by-step plan to PLAN.md with each task having a
@@ -213,9 +219,10 @@ guidelines.
 
 **Servant API Design**:
 
-- Type-level API specification
+- Use **NamedRoutes** pattern for all APIs (modern Servant ergonomics)
+- Type-level API specification with explicit named handlers
 - Automatic JSON serialization via `aeson`
-- Type-safe request/response handling
+- Type-safe request/response handling with better error messages
 
 **Functional Style**:
 
@@ -228,7 +235,10 @@ guidelines.
 
 - **CRITICAL**: All imports MUST be qualified OR use explicit import lists
 - The ONLY exception is `Protolude` which is imported unqualified
-- For operators (type-level or regular), use explicit import lists
+- **Operators** (`:>`, `:-`, `<>`, `>>=`, `<$>`, etc.) go in explicit import
+  lists
+- **Regular names** (types, functions with alphanumeric names) can also go in
+  explicit import lists
 - Use `ImportQualifiedPost` extension (already enabled in `package.yaml`)
 - Example:
   ```haskell
@@ -257,12 +267,28 @@ guidelines.
 **Language Extensions**:
 
 - **CRITICAL**: DO NOT enable language extensions that are already enabled
-  project-wide in `package.yaml`
-- Extensions like `DataKinds`, `OverloadedStrings`, `NoImplicitPrelude`, etc.
-  are already enabled
+  project-wide in `package.yaml` or by **GHC2021**
+- GHC2021 includes: `ConstraintKinds`, `PolyKinds`, `RankNTypes`,
+  `TypeApplications`, `GADTs`, `ImportQualifiedPost`,
+  `StandaloneKindSignatures`, and many more
 - Check `package.yaml` `default-extensions` section before adding
   `{-# LANGUAGE #-}` pragmas
 - Only add pragmas for extensions specific to a single module (rare)
+
+**Modern Record Handling**:
+
+- `DuplicateRecordFields` - Multiple records can have same field names
+- `NoFieldSelectors` - No automatic field selector functions
+- `OverloadedRecordDot` - Use `record.field` syntax (clean, no name conflicts)
+- Example: `user.name` instead of `name user`
+
+**Future Features** (document but use when needed):
+
+- **Effectful** - Modern effect system (use when complex effect handling needed)
+- **LinearTypes** - Resource safety (`%1 ->` for linear functions)
+- **TypeData** - Compile-time-only types for type-level programming
+- **TypeAbstractions** - Explicit type variable binding with `@`-binders
+- **ExtendedLiterals** - Direct syntax for sized numerics (`123i8`, `1000w16`)
 
 **Extensive Test Coverage**:
 
@@ -354,16 +380,20 @@ Important Haskell types (see [SPEC.md](SPEC.md) for full definitions):
 
 ### GHC Configuration
 
-The project uses strict GHC settings:
+The project uses **GHC2021** as the language baseline, providing 48 modern
+extensions by default.
 
 - `-Wall -Werror`: All warnings are errors
-- Many language extensions enabled by default (see `package.yaml`)
+- **Language**: `GHC2021` - Modern Haskell baseline (replaces extension
+  boilerplate)
 - `NoImplicitPrelude`: Uses Protolude instead of base Prelude
 
-Key extensions:
+Additional extensions beyond GHC2021:
 
-- `OverloadedStrings`, `RecordWildCards`, `BlockArguments`
-- `LambdaCase`, `TypeApplications`
+- `DuplicateRecordFields`, `NoFieldSelectors`, `OverloadedRecordDot` - Modern
+  record handling
+- `BlockArguments`, `LambdaCase`, `ViewPatterns` - Syntax conveniences
+- `DataKinds`, `TypeFamilyDependencies` - Type-level programming
 - See `package.yaml` for complete list
 
 ## Development Workflow

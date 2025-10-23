@@ -38,16 +38,19 @@ computation and a TypeScript/Svelte frontend for modern web UX.
 
 #### Backend
 
-**Language**: Haskell with Protolude
+**Language**: Haskell with GHC2021 + Protolude
 
+- **GHC2021** language baseline with 48 modern extensions
 - Strong static typing prevents runtime errors
 - Pure functions enable easy testing and reasoning
 - Lazy evaluation for efficient computation
 - `NoImplicitPrelude` with Protolude for modern Haskell
+- Modern record handling (`OverloadedRecordDot`, `DuplicateRecordFields`)
 
-**Web Framework**: Servant
+**Web Framework**: Servant with NamedRoutes
 
-- Type-level API specification
+- **NamedRoutes** pattern for explicit, named API handlers
+- Type-level API specification with better error messages
 - Automatic API documentation generation
 - Type-safe routing and request handling
 - Built-in support for content negotiation (JSON, HTML)
@@ -79,6 +82,9 @@ library
 
 ### REST API Endpoints
 
+All APIs use **Servant NamedRoutes** pattern for type-safe, explicit handler
+naming.
+
 #### Version 1 (MVP)
 
 **Black-Scholes Pricing**:
@@ -94,6 +100,32 @@ Response: { price, greeks: { delta, gamma, vega, theta, rho } }
 ```
 GET /api/v1/health
 Response: { status, version }
+```
+
+**NamedRoutes Example**:
+
+```haskell
+data API mode = API
+  { health
+      :: mode
+        :- "health"
+          :> Get '[JSON] HealthResponse
+
+  , blackScholes
+      :: mode
+        :- "price"
+          :> "black-scholes"
+          :> ReqBody '[JSON] BSInput
+          :> Post '[JSON] BSOutput
+  }
+  deriving stock (Generic)
+
+server :: API AsServer
+server =
+  API
+    { health = healthHandler
+    , blackScholes = bsHandler
+    }
 ```
 
 #### Future Endpoints (Planned)
