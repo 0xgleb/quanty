@@ -2,3 +2,4 @@
 .direnv
 .stack-work
 *.cabal
+.pre-commit-config.yaml
