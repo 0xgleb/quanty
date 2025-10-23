@@ -35,6 +35,9 @@ structure.
 - [x] Create project documentation
 - [ ] [#2](https://github.com/0xgleb/quanty/issues/2) - Initialize frontend with
       shadcn-svelte
+- [ ] Install Effect ecosystem packages (effect, @effect/schema,
+      @effect/platform)
+- [ ] Setup Effect runtime configuration
 - [ ] [#3](https://github.com/0xgleb/quanty/issues/3) - Setup GitHub Actions CI
       pipeline
 
@@ -75,8 +78,24 @@ Minimal viable frontend with option pricing calculator.
 
 ### Tasks
 
+**Effect Services Infrastructure**:
+
+- [ ] Define ApiClient service using Context.Tag
+- [ ] Implement HTTP client with @effect/platform/HttpClient
+- [ ] Create Effect Schemas for API request/response types
+- [ ] Define error types: NetworkError, ApiError, ValidationError
+- [ ] Add timeout and retry logic to API calls
+- [ ] Create ApiClientLive Layer for dependency injection
+
+**Calculator UI with Effect Integration**:
+
 - [ ] [#8](https://github.com/0xgleb/quanty/issues/8) - Build basic calculator
       UI
+- [ ] Integrate Effect API client in Svelte components
+- [ ] Add Schema validation for user inputs
+- [ ] Handle errors with Effect.catchAll and Effect.catchTag
+- [ ] Display validation errors from Schema
+- [ ] Add loading/error states for async operations
 
 ---
 
@@ -166,12 +185,17 @@ Complete market data feature in a single module containing:
 
 **Frontend Integration**:
 
+- [ ] Create MarketDataService with Effect
+- [ ] Define Effect Schemas for market data responses
 - [ ] Add symbol selector dropdown component
-- [ ] Auto-populate spot price from market data
-- [ ] Auto-populate volatility from historical data
+- [ ] Auto-populate spot price using MarketDataService
+- [ ] Auto-populate volatility using MarketDataService
+- [ ] Implement Effect-based polling for real-time updates
 - [ ] Show last updated timestamp
 - [ ] Add manual override option
 - [ ] Show data staleness warnings
+- [ ] Cache market data with Effect
+- [ ] Handle offline scenarios with Effect fallbacks
 
 ---
 
@@ -232,10 +256,15 @@ Complete implied volatility calculation feature:
 
 **Frontend Integration**:
 
+- [ ] Update API client service with new model endpoints
+- [ ] Create Effect Schemas for binomial/Monte Carlo parameters
 - [ ] Add model selector dropdown (Black-Scholes, Binomial, Monte Carlo)
-- [ ] Show model-specific parameters UI
+- [ ] Show model-specific parameters UI with Schema validation
+- [ ] Use Effect.all for parallel pricing requests in comparison mode
 - [ ] Add model comparison view (side-by-side results)
 - [ ] Display computation time for each model
+- [ ] Use Effect.race to show fastest result first
+- [ ] Handle long-running Monte Carlo with progress updates
 
 ---
 
@@ -274,23 +303,27 @@ Complete portfolio analysis feature:
 
 **Frontend Integration**:
 
+- [ ] Create PortfolioService with Effect
+- [ ] Define Effect Schemas for Position and Portfolio types
 - [ ] Add position builder UI component
+- [ ] Use Effect.all to price all positions in parallel
 - [ ] Show multi-leg payoff diagrams
-- [ ] Display portfolio Greeks table
+- [ ] Display portfolio Greeks table with real-time updates
 - [ ] Add strategy template selector
+- [ ] Validate strategy constraints with Schema refinements
 - [ ] Show risk metrics dashboard
-- [ ] Add save/load portfolio functionality
+- [ ] Add save/load portfolio functionality using Effect
 
 ---
 
-## Phase 7: Real-Time Features
+## Phase 7: Real-Time Features with Effect Streams
 
-Add live data streaming and collaborative features.
+Add live data streaming using Effect Streams for WebSocket management.
 
 ### Deliverables
 
-- WebSocket streaming for live market data
-- Live option prices and Greeks updates
+- Effect Stream-based WebSocket client
+- Live option prices and Greeks updates via streams
 - Real-time chart updates
 - Mobile-responsive design improvements
 
@@ -310,19 +343,49 @@ Add live data streaming and collaborative features.
 - [ ] Push updates to connected clients
 - [ ] Add update throttling (max 1 update/sec)
 
-**Frontend WebSocket Client**:
+**WebSocket Service with Effect Streams**:
 
-- [ ] Create WebSocket connection manager
-- [ ] Handle connection lifecycle (connect, disconnect, reconnect)
-- [ ] Update UI reactively on price changes
+- [ ] Create WebSocketService using Effect Stream
+- [ ] Define WebSocket event types with Effect Schema
+- [ ] Implement connection management with Stream.async
+- [ ] Add reconnection logic with Effect.retry
+- [ ] Implement subscription model using Stream
+- [ ] Add heartbeat/keepalive with Stream.schedule
+- [ ] Handle backpressure with Stream.buffer
+- [ ] Create WebSocketLive Layer
+
+**Live Price Streaming**:
+
+- [ ] Create price stream: `Stream<Price, WebSocketError>`
+- [ ] Subscribe to market data updates
+- [ ] Transform stream with Stream.map
+- [ ] Throttle updates with Stream.throttle (max 1/sec)
+- [ ] Merge multiple symbol streams with Stream.merge
+- [ ] Handle stream errors with Stream.catchAll
+
+**Real-Time Greeks Calculation**:
+
+- [ ] Create Greeks stream derived from price stream
+- [ ] Debounce parameter changes with Stream.debounce
+- [ ] Recalculate Greeks on each price update
+- [ ] Push updates to UI via Svelte runes integration
+
+**Frontend Stream Integration**:
+
+- [ ] Create useEffectStream Svelte hook
+- [ ] Subscribe to WebSocket streams in components
+- [ ] Update UI reactively from stream events
 - [ ] Show connection status indicator
+- [ ] Handle reconnection gracefully with loading states
+- [ ] Cleanup streams on component unmount
 
 **Real-Time Charts**:
 
-- [ ] Update payoff diagrams in real-time
-- [ ] Update Greeks charts in real-time
-- [ ] Add animation for smooth transitions
-- [ ] Add time series price chart
+- [ ] Update payoff diagrams from price stream
+- [ ] Update Greeks charts from stream
+- [ ] Add smooth animations with Stream.debounce
+- [ ] Add time series chart with Stream.sliding window
+- [ ] Handle chart performance with requestAnimationFrame
 
 **Mobile Optimization**:
 

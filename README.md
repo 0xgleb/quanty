@@ -1,8 +1,9 @@
 # Quanty
 
 A web application for pricing cryptocurrency options and other financial
-derivatives. Built with Haskell and TypeScript for high-performance quantitative
-finance calculations.
+derivatives. Built with Haskell and TypeScript (with Effect) for
+high-performance quantitative finance calculations with end-to-end type safety
+and robust error handling.
 
 ## Overview
 
@@ -17,7 +18,10 @@ options, real-time market data, and advanced analytics.
   adjustments
 - **Interactive UI**: Modern web interface built with Svelte 5 and shadcn
   components
+- **Type-Safe Error Handling**: Effect-based architecture for robust error
+  handling and async operations
 - **Real-Time Calculations**: Fast Haskell backend with Servant API
+- **Runtime Validation**: Effect Schema for type-safe data validation
 - **Multiple Instruments**: Support for various option types and derivatives
   (planned)
 - **Market Data Integration**: Real-time and historical crypto price feeds
@@ -37,6 +41,8 @@ options, real-time market data, and advanced analytics.
 - **SvelteKit**: Full-stack framework with SSR support
 - **Svelte 5**: Reactive UI framework with runes
 - **TypeScript**: Type-safe frontend development
+- **Effect**: Type-safe error handling and async operations
+- **@effect/schema**: Runtime validation and type generation
 - **shadcn/ui**: Component library for consistent design
 - **TailwindCSS**: Utility-first styling
 
@@ -107,6 +113,11 @@ stack run                # Start API server
 fourmolu --mode inplace <file>.hs  # Format code
 hlint <file>.hs          # Lint code
 ```
+
+**Tip**: Use `--fast` flag during development for faster feedback:
+
+- `stack build --fast` and `stack test --fast` skip optimizations
+- Use optimized builds only for production
 
 ### Frontend (TypeScript/Svelte)
 

@@ -47,14 +47,14 @@ design early.
 
 ### Subtasks
 
-- [ ] Create `src/Api.hs` with basic Servant API type definition
-- [ ] Define `PlaceholderResponse` data type with JSON serialization
-- [ ] Implement `GET /api/v1/placeholder` endpoint handler
-- [ ] Add health check endpoint `GET /api/v1/health`
-- [ ] Update `package.yaml` to include new modules and dependencies
-- [ ] Create `app/Main.hs` to run the Servant server
-- [ ] Build and test the API endpoints locally with `curl`
-- [ ] Verify JSON response format
+- [x] Create `src/Api.hs` with basic Servant API type definition
+- [x] Define `PlaceholderResponse` data type with JSON serialization
+- [x] Implement `GET /api/v1/placeholder` endpoint handler
+- [x] Add health check endpoint `GET /api/v1/health`
+- [x] Update `package.yaml` to include new modules and dependencies
+- [x] Create `app/Main.hs` to run the Servant server
+- [x] Build and test the API endpoints locally with `curl`
+- [x] Verify JSON response format
 
 **Expected Output**:
 
@@ -103,7 +103,7 @@ applications without running a full server.
   - Should return 200 status
   - Should return JSON with "message" and "timestamp" fields
   - Should return expected message text
-- [ ] Run tests: `stack test`
+- [ ] Run tests: `stack test --fast`
 - [ ] Verify all tests pass
 - [ ] Add test section to README.md explaining how to run tests
 
@@ -425,7 +425,7 @@ This implementation is complete when:
 1. ✅ Haskell backend serves `/api/v1/health` and `/api/v1/placeholder`
    endpoints
 2. ✅ Hspec testing infrastructure is set up with auto-discovery
-3. ✅ Backend tests pass with `stack test` (all endpoint tests green)
+3. ✅ Backend tests pass with `stack test --fast` (all endpoint tests green)
 4. ✅ Test directory structure mirrors `src/` structure
 5. ✅ SvelteKit frontend runs on `http://localhost:5173`
 6. ✅ Frontend successfully calls backend API and displays responses
@@ -434,7 +434,8 @@ This implementation is complete when:
 9. ✅ Pre-commit hooks run on both Haskell and TypeScript files
 10. ✅ Documentation is updated with frontend setup instructions and testing
     commands
-11. ✅ Both `stack build`, `stack test`, and `pnpm build` succeed without errors
+11. ✅ Both `stack build --fast`, `stack test --fast`, and `pnpm build` succeed
+    without errors
 12. ✅ The implementation follows all guidelines in AGENTS.md (package by
     feature will apply in later phases)
 
@@ -448,8 +449,8 @@ This implementation is complete when:
   - Haskell: `package.yaml`, `stack.yaml` at root
   - TypeScript: Root `package.json` with workspace, `frontend/package.json` for
     frontend
-  - All commands run from root: `stack build`, `stack test`, `pnpm dev`,
-    `pnpm build`
+  - All commands run from root: `stack build --fast`, `stack test --fast`,
+    `pnpm dev`, `pnpm build`
 - Package-by-feature organization will be enforced starting in Phase 1
   (Black-Scholes module)
 - For now, `src/Api.hs` can contain the simple placeholder endpoint

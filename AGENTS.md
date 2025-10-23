@@ -11,9 +11,10 @@ computation with a TypeScript/Svelte frontend for modern web UX.
 **Key Technologies**:
 
 - **Backend**: Haskell + Servant for REST API
-- **Frontend**: SvelteKit + TypeScript + shadcn/ui
+- **Frontend**: SvelteKit + TypeScript + Effect + shadcn/ui
 - **Tooling**: Nix flakes for reproducible development environment
-- **Language**: Haskell uses Protolude (no implicit Prelude)
+- **Language**: Haskell uses Protolude (no implicit Prelude), TypeScript uses
+  Effect for type-safe error handling
 
 **Important**: See [README.md](README.md) for getting started guide,
 [SPEC.md](SPEC.md) for detailed architecture, and [ROADMAP.md](ROADMAP.md) for
@@ -130,6 +131,13 @@ fourmolu --mode inplace <file>.hs
 hlint <file>.hs
 ```
 
+**Performance Tip**: Use `--fast` flag during development for faster feedback
+loops:
+
+- `stack build --fast` - Skip optimizations for faster builds
+- `stack test --fast` - Run tests without optimizations
+- Use optimized builds only for production or benchmarking
+
 ### Frontend (TypeScript/Svelte)
 
 ```bash
@@ -216,6 +224,46 @@ guidelines.
 - Explicit error handling (no `unwrap`)
 - Use `Protolude` for modern Haskell
 
+**Import Style**:
+
+- **CRITICAL**: All imports MUST be qualified OR use explicit import lists
+- The ONLY exception is `Protolude` which is imported unqualified
+- For operators (type-level or regular), use explicit import lists
+- Use `ImportQualifiedPost` extension (already enabled in `package.yaml`)
+- Example:
+  ```haskell
+  import Protolude
+  import Data.Aeson qualified as Aeson
+  import Servant (type (:<|>), type (:>), Get, JSON, Handler, Proxy(..), Server)
+  import Servant.Server qualified as Server
+  import Network.Wai qualified as Wai
+  ```
+- **Never** import a whole module unqualified (except `Protolude`)
+
+**Deriving Strategies**:
+
+- **CRITICAL**: Always use explicit deriving strategies
+- Prefer `deriving via` for type class instances
+- Use `deriving anyclass` for classes with Generic defaults (like ToJSON,
+  FromJSON)
+- Use `deriving stock` for standard derived instances (Eq, Show, etc.)
+- Example:
+  ```haskell
+  data MyType = MyType { field :: Text }
+    deriving stock (Generic, Show, Eq)
+    deriving anyclass (Aeson.ToJSON, Aeson.FromJSON)
+  ```
+
+**Language Extensions**:
+
+- **CRITICAL**: DO NOT enable language extensions that are already enabled
+  project-wide in `package.yaml`
+- Extensions like `DataKinds`, `OverloadedStrings`, `NoImplicitPrelude`, etc.
+  are already enabled
+- Check `package.yaml` `default-extensions` section before adding
+  `{-# LANGUAGE #-}` pragmas
+- Only add pragmas for extensions specific to a single module (rare)
+
 **Extensive Test Coverage**:
 
 - `hspec` for basic scenario tests (cover happy paths and error cases)
@@ -224,28 +272,59 @@ guidelines.
 
 ### Frontend
 
-**Svelte 5 Patterns**:
+**Effect-Based Architecture**:
+
+- Use Effect for all async operations and error handling
+- Model errors explicitly with tagged unions using `Data.TaggedError`
+- Define services with Effect for dependency injection
+- Use `@effect/schema` (Schema) for runtime validation of external data
+- Prefer `Effect.gen` over Promise/async-await for async flows
+- Use Layers for composable service configuration
+- All API calls return `Effect<Data, Error, Requirements>`
+
+**Effect Patterns**:
+
+- API calls: Return `Effect<Data, ApiError, HttpClient>`
+- Form validation: Use Schema with custom error messages and refinements
+- State management: Integrate Effect with Svelte runes for async state
+- Error boundaries: Use `Effect.catchAll` and `Effect.catchTag` for graceful
+  error handling
+- Retries: Use `Effect.retry` with exponential backoff for transient failures
+- Concurrency: Use `Effect.all` for parallel operations, `Effect.race` for
+  racing
+- Timeouts: Always add `Effect.timeout` to external operations
+
+**Svelte 5 Integration**:
 
 - Use runes for reactivity (`$state`, `$derived`, `$effect`)
+- Execute Effect programs with `Effect.runPromise` in components
 - Keep components focused and composable
-- Co-locate related code (types, logic, UI)
+- Co-locate related code (types, schemas, services, UI)
 
 **Type Safety**:
 
 - Generate TypeScript types from backend API
+- Define Effect Schemas for all external data (API responses, user input)
 - Strict TypeScript mode enabled
-- Validate API responses
+- Validate API responses with `Schema.decode` (runtime type checking)
+- Use Schema refinements for business rules (e.g., positive numbers, valid
+  ranges)
+- Define error types explicitly (no `unknown` or `any` without validation)
+- End-to-end type safety from API to UI
 
 **Component Organization**:
 
 - Package by feature, not by layer
-- Each feature owns its types, API, components, and tests
+- Each feature owns its schemas, services, types, API, components, and tests
+- Service layer organized in `lib/services/` by feature
+- Schemas organized in `lib/schemas/` by domain
 
 **Test Coverage**:
 
 - Test coverage for frontend code is also expected
 - Frontend test coverage can be less thorough as all mission-critical
   computations should be done on the backend
+- Use Effect test utilities for service testing
 
 ## Key Concepts
 
@@ -306,10 +385,20 @@ Key extensions:
   principle applies)
 - Silently truncate or cap financial values
 - Use `unwrap` or `error` in production code
+- Silently swallow errors (always use `Effect.catchAll` or `Effect.catchTag`)
+- Use try/catch in new TypeScript code (use `Effect.try` instead)
+- Use `any` or `unknown` without validation (use `Schema.decode`)
+- Make external API calls without timeout (use `Effect.timeout`)
 
 **Always**:
 
-- Handle errors explicitly
+- Handle errors explicitly with typed errors
+- Use Effect for async operations and error handling in TypeScript
+- Define explicit error types with tagged unions
+- Validate all external data with Effect Schema
+- Use `Effect.gen` for readable async flows
+- Add timeout to all external API calls
+- Use Layers for dependency injection in TypeScript
 - Validate all inputs (backend AND frontend)
 - Write tests for business logic
 - Keep visibility as restrictive as possible
@@ -323,11 +412,15 @@ Key extensions:
 - Property tests for invariants (call-put parity)
 - API integration tests
 
-**Frontend** (Vitest + Testing Library):
+**Frontend** (Vitest + Testing Library + Effect Test):
 
 - Component tests in isolation
 - Integration tests for user flows
-- Mock API responses for tests
+- Use `Layer.succeed` to mock Effect services in tests
+- Test error scenarios with `Effect.fail`
+- Use `Effect.gen` in tests for readable async test code
+- Property tests for Schema validation
+- Mock API responses with test layers
 
 ## Documentation
 
