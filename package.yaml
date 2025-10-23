@@ -10,10 +10,13 @@ dependencies:
   - base >= 4.14.4.0 && < 5
   - protolude
   - hspec
+  - hspec-wai
+  - hspec-wai-json
   - servant-server
   - servant
   - aeson
   - wai
+  - wai-extra
   - warp
   - time
   - text
@@ -35,14 +38,17 @@ executables:
       - quanty
 
 tests:
-  options-tests:
-    main: OptionsPricing.hs
-    source-dirs: .
+  quanty-test:
+    main: Spec.hs
+    source-dirs: test
     ghc-options:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -O2
+    dependencies:
+      - quanty
+    build-tools:
+      - hspec-discover
 
 ghc-options:
   - -Wall

@@ -119,6 +119,14 @@ hlint <file>.hs          # Lint code
 - `stack build --fast` and `stack test --fast` skip optimizations
 - Use optimized builds only for production
 
+**Testing**: The project uses `hspec` with automatic test discovery via
+`hspec-discover`:
+
+- Tests live in `test/` directory
+- Test files must end with `Spec.hs` and export a `spec :: Spec` binding
+- API endpoint tests use `hspec-wai` for testing Servant applications
+- Run tests with `stack test --fast` during development
+
 ### Frontend (TypeScript/Svelte)
 
 ```bash

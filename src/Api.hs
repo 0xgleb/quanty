@@ -30,7 +30,6 @@ data API mode = API
   deriving stock (Generic)
 
 
--- | Health check response
 data HealthResponse = HealthResponse
   { status :: Text
   , version :: Text
@@ -39,7 +38,6 @@ data HealthResponse = HealthResponse
   deriving anyclass (Aeson.ToJSON, Aeson.FromJSON)
 
 
--- | Placeholder endpoint response
 data PlaceholderResponse = PlaceholderResponse
   { message :: Text
   , timestamp :: Text
@@ -48,10 +46,8 @@ data PlaceholderResponse = PlaceholderResponse
   deriving anyclass (Aeson.ToJSON, Aeson.FromJSON)
 
 
--- | Server implementation with named handlers
 server :: API AsServer
-server =
-  API {..}
+server = API {..}
   where
     health :: Servant.Handler HealthResponse
     health =
@@ -71,7 +67,6 @@ server =
           }
 
 
--- | WAI Application
 app :: Wai.Application
 app =
   Server.serve

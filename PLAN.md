@@ -79,33 +79,33 @@ applications without running a full server.
 
 ### Subtasks
 
-- [ ] Update `package.yaml` to add test dependencies:
+- [x] Update `package.yaml` to add test dependencies:
   - `hspec` (test framework)
   - `hspec-wai` (WAI application testing)
   - `hspec-wai-json` (JSON response helpers)
   - `aeson` (already a dependency, needed for JSON)
-- [ ] Create `test/Spec.hs` with hspec-discover preprocessor directive:
+- [x] Create `test/Spec.hs` with hspec-discover preprocessor directive:
   ```haskell
   {-# OPTIONS_GHC -F -pgmF hspec-discover #-}
   ```
-- [ ] Create test directory structure mirroring `src/`:
+- [x] Create test directory structure mirroring `src/`:
   ```
   test/
   ├── Spec.hs
   └── ApiSpec.hs
   ```
-- [ ] Create `test/ApiSpec.hs` with initial tests for placeholder endpoints
-- [ ] Write test specs for `GET /api/v1/health` endpoint:
+- [x] Create `test/ApiSpec.hs` with initial tests for placeholder endpoints
+- [x] Write test specs for `GET /api/v1/health` endpoint:
   - Should return 200 status
   - Should return JSON with "status" and "version" fields
   - Should return `status: "ok"`
-- [ ] Write test specs for `GET /api/v1/placeholder` endpoint:
+- [x] Write test specs for `GET /api/v1/placeholder` endpoint:
   - Should return 200 status
   - Should return JSON with "message" and "timestamp" fields
   - Should return expected message text
-- [ ] Run tests: `stack test --fast`
-- [ ] Verify all tests pass
-- [ ] Add test section to README.md explaining how to run tests
+- [x] Run tests: `stack test --fast`
+- [x] Verify all tests pass
+- [x] Add test section to README.md explaining how to run tests
 
 **Expected Test Structure**:
 
