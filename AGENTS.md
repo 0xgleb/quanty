@@ -36,6 +36,79 @@ The development shell provides:
 
 Stack is configured to use `system-ghc: true` to use the GHC from Nix.
 
+## Plan & Review
+
+### Before starting work
+
+- Write a comprehensive step-by-step plan to PLAN.md with each task having a
+  corresponding section and a list of subtasks as checkboxes inside of it
+- The task sections should follow the format `## Task N. <TASK NAME>`
+- The plan should be a detailed implementation plan and the reasoning behind the
+  design decisions
+- Do not include timelines in the plan as they tend to be inaccurate
+- Remain focused on the task at hand, do not include unrelated improvements or
+  premature optimizations
+- Once you write the plan, ask me to review it. Do not continue until I approve
+  the plan.
+
+### While implementing
+
+- **CRITICAL: Complete tasks one at a time and wait for review**
+  - When asked to complete a task from a plan, complete ONLY that task
+  - Do NOT proceed to the next task until the user reviews and approves your
+    changes
+  - The user manually reviews all git diffs, so changes must be minimal and
+    focused
+  - **Any diff not required to complete the task is a guideline violation** - no
+    drive-by improvements, refactorings, or style changes unless explicitly
+    included in the scope of the task or requested by the user
+  - Exception: If the user explicitly asks you to "complete the whole plan" or
+    "complete the entire feature", you may work through multiple tasks
+  - By default, always work one task at a time
+- **CRITICAL: Tasks must be ordered correctly in plans**
+  - When creating implementation plans, ensure tasks are in the correct order
+  - Earlier tasks MUST NOT depend on code from later tasks
+  - All checks (tests, hlint, fourmolu, prettier, eslint) SHOULD pass at the end
+    of each task whenever possible
+  - Focused git diffs and passing checks make reviewing much easier
+- Update PLAN.md every time you complete a task by marking checkboxes as `[x]`
+- Keep PLAN.md concise - just tick off checkboxes, do not add "Changes Made"
+  sections or verbose changelogs
+- The code diffs themselves should be self-explanatory and easy to review
+
+### Before creating a PR
+
+- **CRITICAL**: Delete PLAN.md before submitting changes for review
+- PLAN.md is a transient development file that should ONLY exist on development
+  branches
+- PLAN.md should NEVER appear in pull requests or be merged to main/master
+- The plan is for development tracking only - final documentation goes in commit
+  messages, docstrings, and permanent markdown documents
+- **CRITICAL**: Update all documentation to reflect your changes
+  - **ROADMAP.md**: Mark completed tasks as done with the PR link
+    - When you complete a task that corresponds to an item in ROADMAP.md, update
+      the roadmap to mark it as complete `[x]` and add the PR link
+    - Format: `- [x] Task description`
+    - Add PR reference: `- **PR:** [#N](pr-url)`
+    - This ensures the roadmap accurately reflects progress when the PR is
+      merged
+  - **README.md**: Review and update if your changes affect:
+    - Project structure (new directories, modules)
+    - Key features or capabilities
+    - Development commands or workflows
+    - API endpoints
+    - Architecture overview
+  - **SPEC.md**: Review and update if your changes affect:
+    - Type definitions or data structures
+    - API endpoints or request/response formats
+    - Pricing models or algorithms
+    - Business logic or domain concepts
+    - Integration points with external systems
+  - **AGENTS.md**: Update if you introduce new patterns, practices, or
+    conventions that other developers should follow
+  - Out-of-date documentation has negative value - it confuses more than it
+    clarifies
+
 ## Common Commands
 
 ### Backend (Haskell)
