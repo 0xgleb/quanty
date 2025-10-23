@@ -1,0 +1,330 @@
+# Quanty Technical Specification
+
+## Overview
+
+Quanty is a web application for pricing cryptocurrency options and financial
+derivatives. It provides an intuitive interface for quantitative analysts,
+traders, and researchers to price options using various models, analyze Greeks,
+and visualize risk.
+
+The system is built with a Haskell backend for high-performance numerical
+computation and a TypeScript/Svelte frontend for modern web UX.
+
+## Architecture
+
+### System Components
+
+**Backend (Haskell + Servant)**:
+
+- REST API server exposing pricing endpoints
+- Pure functional pricing models (Black-Scholes, Binomial, Monte Carlo)
+- Market data integration layer
+- Caching layer for expensive computations
+
+**Frontend (SvelteKit + TypeScript)**:
+
+- Web application with interactive UI
+- Option pricing calculators with real-time updates
+- Financial charting with TradingView Lightweight Charts
+- Greeks analysis and visualization
+
+**Infrastructure (Nix)**:
+
+- Reproducible development environment
+- Unified dependency management for both Haskell and Node.js
+- Build system for deployment
+
+### Technology Stack
+
+#### Backend
+
+**Language**: Haskell with Protolude
+
+- Strong static typing prevents runtime errors
+- Pure functions enable easy testing and reasoning
+- Lazy evaluation for efficient computation
+- `NoImplicitPrelude` with Protolude for modern Haskell
+
+**Web Framework**: Servant
+
+- Type-level API specification
+- Automatic API documentation generation
+- Type-safe routing and request handling
+- Built-in support for content negotiation (JSON, HTML)
+
+**Key Libraries**: `servant-server`, `aeson`, `http-client`, `statistics`,
+`vector`, `hspec`
+
+#### Frontend
+
+**Framework**: SvelteKit - Full-stack web framework with file-based routing
+
+**UI Framework**: Svelte 5 - Reactive programming with runes (`$state`,
+`$derived`, `$effect`)
+
+**Component Library**: shadcn/ui (Svelte port) - Accessible, customizable
+components
+
+**Styling**: TailwindCSS - Utility-first CSS framework
+
+**Type Safety**: TypeScript - End-to-end type safety with generated types from
+backend
+
+**Charting**: TradingView Lightweight Charts - Professional financial charting
+library
+
+## API Design
+
+### REST API Endpoints
+
+#### Version 1 (MVP)
+
+**Black-Scholes Pricing**:
+
+```
+POST /api/v1/price/black-scholes
+Request: { optionType, spot, strike, timeToExpiry, riskFreeRate, volatility }
+Response: { price, greeks: { delta, gamma, vega, theta, rho } }
+```
+
+**Health Check**:
+
+```
+GET /api/v1/health
+Response: { status, version }
+```
+
+#### Future Endpoints (Planned)
+
+- `POST /api/v1/price/binomial` - Binomial tree pricing
+- `POST /api/v1/price/monte-carlo` - Monte Carlo simulation
+- `GET /api/v1/market/price/:symbol` - Real-time market data
+- `GET /api/v1/market/volatility/:symbol` - Implied volatility surface
+- `POST /api/v1/portfolio/analyze` - Portfolio Greeks and risk
+
+### Core Data Types
+
+Domain types defined in Haskell:
+
+- `OptionType`: Call | Put
+- `OptionStyle`: European | American
+- `BlackScholesInput`: Pricing parameters (spot, strike, time, rate, volatility)
+- `OptionPrice`: Price with Greeks
+- `Greeks`: Delta, Gamma, Vega, Theta, Rho (option sensitivities)
+
+JSON serialization handled automatically via `aeson` with Generic deriving.
+
+## Pricing Models
+
+### Black-Scholes Model (Phase 1)
+
+Classic closed-form solution for European options.
+
+**Key Assumptions**:
+
+- European exercise (only at expiration)
+- No dividends, constant volatility, constant risk-free rate
+- Lognormal price distribution, continuous trading
+- No transaction costs
+
+**Implementation Approach**:
+
+- Calculate d1 and d2 parameters using standard formulas
+- Use cumulative normal distribution (CDF) for pricing
+- Calculate Greeks via analytical derivatives or finite differences
+
+### Crypto-Specific Adjustments (Future)
+
+Cryptocurrency markets have unique characteristics:
+
+- **24/7 Trading**: 365 days/year vs 252 for traditional markets
+- **High Volatility**: Much higher volatility than traditional assets
+- **Thin Markets**: Lower liquidity can cause significant slippage
+- **Funding Rates**: Perpetual futures funding affects option pricing
+- **Regulatory Risk**: Sudden price movements from regulatory changes
+
+Future iterations will incorporate:
+
+- Jump-diffusion models for sudden price movements
+- Stochastic volatility models (Heston)
+- Crypto-specific calendar adjustments
+- Funding rate incorporation for perpetual derivatives
+
+## Frontend Architecture
+
+### Component Structure
+
+Organized by feature in `frontend/src/`:
+
+- `lib/components/ui/` - shadcn/ui base components
+- `lib/components/calculator/` - Option pricing form and results
+- `lib/components/charts/` - Payoff diagrams, Greeks charts, volatility surface
+- `lib/components/layout/` - Header, sidebar, navigation
+- `lib/api/` - API client with generated TypeScript types
+- `lib/stores/` - Svelte stores for state management
+- `routes/` - SvelteKit file-based routes
+
+### State Management
+
+**Svelte 5 Runes**:
+
+- `$state` - Reactive state variables
+- `$derived` - Computed values that update automatically
+- `$effect` - Side effects that run when dependencies change
+
+State is managed locally in components with Svelte runes. Shared state uses
+Svelte stores when needed across routes.
+
+### Type Safety Strategy
+
+1. Define Servant API types in Haskell
+2. Generate TypeScript types using `servant-typescript` or similar
+3. Frontend imports generated types for API requests/responses
+4. Compile-time verification of API contracts
+5. Runtime validation of API responses
+
+## Development Workflow
+
+### Backend Development
+
+Package by feature, not by layer. Each feature module contains all related code.
+
+1. Create feature module (e.g., `src/BlackScholes/`)
+2. Define types within the feature module
+3. Implement business logic in the same module
+4. Add API endpoints in the same module
+5. Write tests co-located with implementation
+6. Format with fourmolu and lint with hlint
+
+### Frontend Development
+
+1. Design component UI (Figma or directly in Svelte)
+2. Implement with Svelte + shadcn components
+3. Connect to API using generated types
+4. Add tests (component tests, integration tests)
+5. Format with prettier and lint with eslint
+
+### Full-Stack Feature Example
+
+Adding binomial tree pricing:
+
+1. Backend: Create `src/Binomial/` module containing types, pricing logic, API
+   endpoints, and tests
+2. Type generation: Regenerate TypeScript types from Haskell API
+3. Frontend: Create calculator component, add route, connect to API
+4. Testing: End-to-end tests with real API calls
+
+## Testing Strategy
+
+### Backend (Haskell + HSpec)
+
+- **Unit Tests**: Test individual pricing models
+- **Property Tests**: QuickCheck for invariants (e.g., call-put parity)
+- **API Tests**: Test Servant endpoints with servant-client
+
+### Frontend (Vitest + Testing Library)
+
+- **Component Tests**: Test UI components in isolation
+- **Integration Tests**: Test complete user flows
+- **API Client Tests**: Mock API responses for testing
+
+## Deployment
+
+### Development
+
+```bash
+stack run              # Backend API server
+cd frontend && pnpm dev  # Frontend dev server
+```
+
+### Production
+
+**Build Process**:
+
+1. Backend: `stack build --copy-bins` produces binary
+2. Frontend: `pnpm build` produces static assets
+3. Deploy backend binary and frontend static files
+4. Configure reverse proxy (nginx) to route requests
+
+**Deployment Options**:
+
+- **Fly.io**: Docker deployment with global edge network
+- **Railway**: Simple deployment with Nix support
+- **Self-hosted**: systemd service + nginx reverse proxy
+
+**Future**: Docker multi-stage build combining backend and frontend
+
+## Security Considerations
+
+**API Security**:
+
+- Rate limiting to prevent abuse
+- Input validation on all endpoints
+- CORS configuration for frontend origin
+- HTTPS only in production
+
+**Frontend Security**:
+
+- CSP headers to prevent XSS
+- Sanitize user inputs
+- Secure handling of API keys for market data (if needed)
+
+**Data Validation**:
+
+- Backend validates all numeric inputs (positive prices, valid ranges)
+- Frontend validates before submission (better UX)
+- Type system prevents invalid states
+
+## Performance Considerations
+
+**Backend**:
+
+- Pure functions enable easy memoization
+- Lazy evaluation for efficiency
+- Parallel computation for Monte Carlo simulations
+- Caching for expensive calculations
+
+**Frontend**:
+
+- TBD: Rendering strategy (SSR, CSR, or hybrid)
+- Code splitting for smaller bundle sizes
+- Debouncing for real-time parameter updates
+- WebWorkers for intensive client-side calculations (future)
+
+## Future Enhancements
+
+### Advanced Pricing Models
+
+- Binomial tree pricing for American options
+- Monte Carlo simulation for path-dependent options
+- Implied volatility calculation from market prices
+- Additional models: Heston, jump-diffusion, local volatility
+
+### Market Data Integration
+
+- Real-time crypto prices from exchanges (Binance, Coinbase)
+- Historical price data for backtesting
+- Implied volatility surface
+- Options chain data (when available)
+
+### Portfolio Analysis
+
+- Multi-option position builder
+- Portfolio Greeks aggregation
+- Strategy templates (straddles, spreads, etc.)
+- Risk metrics (VaR, max drawdown)
+
+### Real-Time Features
+
+- WebSocket streaming for live market data
+- Live price and Greeks updates
+- Real-time chart updates
+- Mobile-responsive design
+
+## References
+
+- Black, F., & Scholes, M. (1973). "The Pricing of Options and Corporate
+  Liabilities"
+- Hull, J. C. "Options, Futures, and Other Derivatives"
+- Servant Documentation: https://docs.servant.dev
+- SvelteKit Documentation: https://kit.svelte.dev

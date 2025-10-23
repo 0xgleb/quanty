@@ -82,6 +82,7 @@ wealthSpec = describe "wealth" do
   it "end of period wealth equals to the initial wealth + gains" do
     wealth 1 `shouldBe` wealth 0 + gains 1
 
+
 gainsSpec :: Spec
 gainsSpec = do
   describe "end of period wealth" do

@@ -30,6 +30,10 @@
           # TypeScript
           eslint.enable = true;
           prettier.enable = true;
+
+          # Misc
+          denofmt.enable = true;
+          shellcheck.enable = true;
         };
 
         devShell = devenv.lib.mkShell {
