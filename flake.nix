@@ -32,7 +32,10 @@
           prettier.enable = true;
 
           # Misc
-          denofmt.enable = true;
+          denofmt = {
+            enable = true;
+            excludes = [ ".*\\.ts$" ".*\\.js$" ".*\\.json$" ];
+          };
           shellcheck.enable = true;
         };
 

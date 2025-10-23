@@ -201,17 +201,16 @@ conventions.
 
 ### Subtasks
 
-- [ ] Run `pnpm dlx sv create frontend` in project root (choose TypeScript,
+- [x] Run `pnpm dlx sv create frontend` in project root (choose TypeScript,
       SvelteKit demo app template)
-- [ ] Verify the `frontend/` directory structure is created correctly
-- [ ] Run `pnpm install` from root to install frontend dependencies via
-      workspace
-- [ ] Add TailwindCSS: `pnpm --filter frontend dlx sv add tailwindcss`
-- [ ] Verify Tailwind configuration files are created (`tailwind.config.ts`,
-      `app.css`)
-- [ ] Check that `svelte.config.js` has default `$lib` alias configured
-- [ ] Test that basic SvelteKit app runs from root: `pnpm dev`
-- [ ] Update `frontend/.gitignore` if needed
+- [x] Verify the `frontend/` directory structure is created correctly
+- [x] Run `pnpm install` from frontend directory to install dependencies
+- [x] Add TailwindCSS: `pnpm dlx sv add tailwindcss`
+- [x] Verify Tailwind configuration files are created (`@import 'tailwindcss'`
+      in `app.css`, `@tailwindcss/vite` plugin in `vite.config.ts`)
+- [x] Check that `svelte.config.js` has default `$lib` alias configured
+- [x] Test that basic SvelteKit app runs: `pnpm dev`
+- [x] Update `frontend/.gitignore` if needed
 
 **Expected Project Structure**:
 
@@ -240,7 +239,7 @@ integrates with existing pre-commit hooks in the Nix environment.
 
 ### Subtasks
 
-- [ ] Add prettier configuration to `frontend/package.json`:
+- [x] Add prettier configuration to `frontend/package.json`:
   ```json
   "prettier": {
     "tabWidth": 2,
@@ -249,21 +248,24 @@ integrates with existing pre-commit hooks in the Nix environment.
     "arrowParens": "avoid"
   }
   ```
-- [ ] Install ESLint dependencies:
-      `pnpm add -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-svelte svelte-eslint-parser`
-- [ ] Create `frontend/.eslintrc.cjs` with TypeScript + Svelte configuration
-- [ ] Update `frontend/package.json` scripts:
+- [x] Install ESLint dependencies:
+      `pnpm add -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-svelte svelte-eslint-parser @eslint/js globals`
+- [x] Create `frontend/eslint.config.js` with TypeScript + Svelte configuration
+      (ESLint v9 flat config)
+- [x] Create root `eslint.config.js` to satisfy pre-commit hooks
+- [x] Update `frontend/package.json` scripts:
   ```json
   {
-    "lint": "eslint . --ext ts,svelte --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "format": "prettier --write ."
   }
   ```
-- [ ] Update `frontend/tsconfig.json` to enable strict mode and unused variable
-      warnings
-- [ ] Test that `pnpm lint` and `pnpm format` work correctly
-- [ ] Verify pre-commit hooks work for frontend files (stage a file and commit
-      to test)
+- [x] Update `frontend/tsconfig.json` to enable strict mode and unused variable
+      warnings (`noUnusedLocals`, `noUnusedParameters`)
+- [x] Test that `pnpm lint` and `pnpm format` work correctly
+- [x] Verify pre-commit hooks work for frontend files
+- [x] Configure `flake.nix` to exclude TypeScript files from denofmt (to avoid
+      conflicts with prettier)
 
 **Note**: The root `flake.nix` already has prettier/eslint hooks enabled, so
 they should automatically apply to frontend files.
