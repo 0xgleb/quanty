@@ -282,17 +282,18 @@ automatically.
 
 ### Subtasks
 
-- [ ] Run `pnpm dlx shadcn-svelte@latest init` from `frontend/` directory
-- [ ] Select configuration during CLI prompts:
-  - Base color: Slate (neutral, professional)
+- [x] Run `pnpm dlx shadcn-svelte@latest init` from `frontend/` directory
+- [x] Select configuration during CLI prompts:
+  - Base color: Zinc (selected during init)
   - CSS file location: default (`src/app.css`)
   - Import aliases: default (`$lib` paths)
-- [ ] Verify `components.json` is created with correct configuration
-- [ ] Verify `src/lib/utils.ts` is created with `cn()` helper
-- [ ] Add first component: `pnpm dlx shadcn-svelte@latest add button`
-- [ ] Add card component: `pnpm dlx shadcn-svelte@latest add card`
-- [ ] Verify components are created in `src/lib/components/ui/`
-- [ ] Test importing and using Button component in a page
+- [x] Verify `components.json` is created with correct configuration
+- [x] Verify `src/lib/utils.ts` is created with `cn()` helper
+- [x] Add first component: `pnpm dlx shadcn-svelte@latest add button`
+- [x] Add card component: `pnpm dlx shadcn-svelte@latest add card`
+- [x] Verify components are created in `src/lib/components/ui/`
+- [x] Test importing and using Button component (verified via dev server
+      startup)
 
 **Expected Structure After**:
 
