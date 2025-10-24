@@ -473,7 +473,9 @@ features.
 - Validate all inputs (backend AND frontend)
 - Write tests for business logic
 - Keep visibility as restrictive as possible
-- Add comments only when code can't express intent
+- Write self-documenting code; avoid unnecessary comments
+- Only add comments for complex, unusual, or confusing situations that cannot be
+  expressed clearly through code structure, naming, or types
 
 ### Testing Strategy
 
