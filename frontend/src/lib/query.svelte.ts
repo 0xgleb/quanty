@@ -1,4 +1,4 @@
-import { Effect } from "effect"
+import { Effect, Fiber, Exit, Cause } from "effect"
 import { untrack } from "svelte"
 
 type QueryState<TData, TError> =
@@ -19,35 +19,33 @@ type QueryResult<TData, TError> = {
  * Create a query that automatically fetches on mount and provides reactive state.
  * Similar to TanStack Query but built for Svelte 5 runes + Effect.
  *
- * Automatically cancels in-flight requests when component unmounts.
+ * Automatically interrupts in-flight Effects when component unmounts.
  */
 export const createQuery = <TData, TError>(
   effect: Effect.Effect<TData, TError, never>,
 ): QueryResult<TData, TError> => {
   let state = $state<QueryState<TData, TError>>({ status: "pending" })
-  let abortController: AbortController | null = null
+  let currentFiber: Fiber.RuntimeFiber<TData, TError> | null = null
 
   const fetch = () => {
-    // Cancel previous request if still running
-    if (abortController) {
-      abortController.abort()
+    // Interrupt previous fiber if still running
+    if (currentFiber) {
+      Effect.runFork(Fiber.interrupt(currentFiber))
     }
 
-    abortController = new AbortController()
-    const signal = abortController.signal
-
     state = { status: "pending" }
-    Effect.runPromise(effect)
-      .then(data => {
-        if (!signal.aborted) {
-          state = { status: "success", data }
+    currentFiber = Effect.runFork(effect)
+
+    Fiber.await(currentFiber).then(exit => {
+      if (Exit.isSuccess(exit)) {
+        state = { status: "success", data: exit.value }
+      } else if (Exit.isFailure(exit) && !Cause.isInterrupted(exit.cause)) {
+        const error = Cause.failureOption(exit.cause)
+        if (error._tag === "Some") {
+          state = { status: "error", error: error.value }
         }
-      })
-      .catch(error => {
-        if (!signal.aborted) {
-          state = { status: "error", error }
-        }
-      })
+      }
+    })
   }
 
   // Auto-fetch on mount, cancel on unmount
@@ -55,9 +53,9 @@ export const createQuery = <TData, TError>(
     untrack(fetch)
 
     return () => {
-      // Cleanup: cancel in-flight request when component unmounts
-      if (abortController) {
-        abortController.abort()
+      // Cleanup: interrupt in-flight fiber when component unmounts
+      if (currentFiber) {
+        Effect.runFork(Fiber.interrupt(currentFiber))
       }
     }
   })
@@ -88,14 +86,14 @@ type MutationState<TData, TError> =
   | { status: "success"; data: TData }
   | { status: "error"; error: TError }
 
-type MutationResult<TData, TError> = {
+type MutationResult<TInput, TData, TError> = {
   data: TData | undefined
   error: TError | undefined
   isPending: boolean
   isSuccess: boolean
   isError: boolean
   isIdle: boolean
-  mutate: () => void
+  mutate: TInput extends void ? () => void : (input: TInput) => void
   reset: () => void
 }
 
@@ -103,46 +101,44 @@ type MutationResult<TData, TError> = {
  * Create a mutation for manual triggering (e.g., button clicks).
  * Similar to TanStack Query mutations but built for Svelte 5 runes + Effect.
  *
- * Automatically cancels in-flight requests when component unmounts.
+ * Automatically interrupts in-flight Effects when component unmounts.
  */
-export const createMutation = <TData, TError>(
-  effect: Effect.Effect<TData, TError, never>,
-): MutationResult<TData, TError> => {
+export const createMutation = <TInput, TData, TError>(
+  effectFn: (input: TInput) => Effect.Effect<TData, TError, never>,
+): MutationResult<TInput, TData, TError> => {
   let state = $state<MutationState<TData, TError>>({ status: "idle" })
-  let abortController: AbortController | null = null
+  let currentFiber: Fiber.RuntimeFiber<TData, TError> | null = null
 
-  const mutate = () => {
-    // Cancel previous request if still running
-    if (abortController) {
-      abortController.abort()
+  const mutate = ((input?: TInput) => {
+    // Interrupt previous fiber if still running
+    if (currentFiber) {
+      Effect.runFork(Fiber.interrupt(currentFiber))
     }
 
-    abortController = new AbortController()
-    const signal = abortController.signal
-
     state = { status: "pending" }
-    Effect.runPromise(effect)
-      .then(data => {
-        if (!signal.aborted) {
-          state = { status: "success", data }
+    currentFiber = Effect.runFork(effectFn(input as TInput))
+
+    Fiber.await(currentFiber).then(exit => {
+      if (Exit.isSuccess(exit)) {
+        state = { status: "success", data: exit.value }
+      } else if (Exit.isFailure(exit) && !Cause.isInterrupted(exit.cause)) {
+        const error = Cause.failureOption(exit.cause)
+        if (error._tag === "Some") {
+          state = { status: "error", error: error.value }
         }
-      })
-      .catch(error => {
-        if (!signal.aborted) {
-          state = { status: "error", error }
-        }
-      })
-  }
+      }
+    })
+  }) as TInput extends void ? () => void : (input: TInput) => void
 
   const reset = () => {
     state = { status: "idle" }
   }
 
-  // Cancel in-flight request when component unmounts
+  // Interrupt in-flight fiber when component unmounts
   $effect(() => {
     return () => {
-      if (abortController) {
-        abortController.abort()
+      if (currentFiber) {
+        Effect.runFork(Fiber.interrupt(currentFiber))
       }
     }
   })

@@ -38,14 +38,15 @@ computation and a TypeScript/Svelte frontend for modern web UX.
 
 #### Backend
 
-**Language**: Haskell with GHC2021 + Protolude
+**Language**: Haskell with GHC2024 + Protolude
 
-- **GHC2021** language baseline with 48 modern extensions
+- **GHC2024** language baseline with modern type system features
 - Strong static typing prevents runtime errors
 - Pure functions enable easy testing and reasoning
 - Lazy evaluation for efficient computation
 - `NoImplicitPrelude` with Protolude for modern Haskell
-- Modern record handling (`OverloadedRecordDot`, `DuplicateRecordFields`)
+- Modern record handling (`OverloadedRecordDot`, `DuplicateRecordFields`,
+  `NoFieldSelectors`)
 
 **Web Framework**: Servant with NamedRoutes
 

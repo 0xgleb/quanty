@@ -5,7 +5,7 @@
   import { createQuery, createMutation } from "$lib/query.svelte"
 
   const healthQuery = createQuery(getHealth)
-  const placeholderMutation = createMutation(getPlaceholder)
+  const placeholderMutation = createMutation(() => getPlaceholder)
 
   const healthVersion = $derived(healthQuery.data?.version ?? null)
   const backendAvailable = $derived(healthQuery.isSuccess)
