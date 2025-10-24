@@ -14,12 +14,16 @@ dependencies:
   - hspec-wai-json
   - servant-server
   - servant
+  - servant-openapi3
+  - openapi3
   - aeson
   - wai
   - wai-extra
   - warp
   - time
   - text
+  - bytestring
+  - lens
 
 language: GHC2024
 
@@ -34,6 +38,14 @@ executables:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+    dependencies:
+      - quanty
+
+  generate-openapi:
+    main: GenerateOpenApi.hs
+    source-dirs: app
+    ghc-options:
+      - -main-is GenerateOpenApi
     dependencies:
       - quanty
 

@@ -50,8 +50,8 @@ design early.
 
 - [x] Create `src/Api.hs` with basic Servant API type definition
 - [x] Define `PlaceholderResponse` data type with JSON serialization
-- [x] Implement `GET /api/v1/placeholder` endpoint handler
-- [x] Add health check endpoint `GET /api/v1/health`
+- [x] Implement `GET /placeholder` endpoint handler
+- [x] Add health check endpoint `GET /health`
 - [x] Update `package.yaml` to include new modules and dependencies
 - [x] Create `app/Main.hs` to run the Servant server
 - [x] Build and test the API endpoints locally with `curl`
@@ -60,10 +60,10 @@ design early.
 **Expected Output**:
 
 ```json
-GET /api/v1/health
+GET /health
 { "status": "ok", "version": "0.1.0" }
 
-GET /api/v1/placeholder
+GET /placeholder
 { "message": "Hello from Quanty API", "timestamp": "2025-10-22T..." }
 ```
 
@@ -96,11 +96,11 @@ applications without running a full server.
   └── ApiSpec.hs
   ```
 - [x] Create `test/ApiSpec.hs` with initial tests for placeholder endpoints
-- [x] Write test specs for `GET /api/v1/health` endpoint:
+- [x] Write test specs for `GET /health` endpoint:
   - Should return 200 status
   - Should return JSON with "status" and "version" fields
   - Should return `status: "ok"`
-- [x] Write test specs for `GET /api/v1/placeholder` endpoint:
+- [x] Write test specs for `GET /placeholder` endpoint:
   - Should return 200 status
   - Should return JSON with "message" and "timestamp" fields
   - Should return expected message text
@@ -119,12 +119,12 @@ import Test.Hspec.Wai.JSON
 
 spec :: Spec
 spec = with (return app) $ do
-  describe "GET /api/v1/health" $ do
+  describe "GET /health" $ do
     it "responds with 200" $ do
-      get "/api/v1/health" `shouldRespondWith` 200
+      get "/health" `shouldRespondWith` 200
 
     it "returns valid health status" $ do
-      get "/api/v1/health" `shouldRespondWith`
+      get "/health" `shouldRespondWith`
         [json|{status: "ok", version: "0.1.0"}|]
 ```
 
@@ -327,20 +327,23 @@ generation (Task 8). This approach:
 
 ### Subtasks
 
-- [ ] Add dependencies to `package.yaml`:
+- [x] Add dependencies to `package.yaml`:
   ```yaml
   dependencies:
     - servant-openapi3
     - openapi3
+    - bytestring
+    - lens
   ```
-- [ ] Run `stack build` to install new dependencies
-- [ ] Update `src/Api.hs` imports:
+- [x] Run `stack build` to install new dependencies
+- [x] Update `src/Api.hs` imports:
   ```haskell
+  import Control.Lens ((.~), (?~))
   import Data.OpenApi (ToSchema)
   import Data.OpenApi qualified as OpenApi
   import Servant.OpenApi qualified
   ```
-- [ ] Derive `ToSchema` instances for response types:
+- [x] Derive `ToSchema` instances for response types:
 
   ```haskell
   data HealthResponse = HealthResponse
@@ -356,18 +359,18 @@ generation (Task 8). This approach:
       deriving anyclass (Aeson.ToJSON, Aeson.FromJSON, ToSchema)
   ```
 
-- [ ] Create `apiOpenApi` function in `src/Api.hs`:
+- [x] Create `apiOpenApi` function in `src/Api.hs`:
   ```haskell
   apiOpenApi :: OpenApi.OpenApi
   apiOpenApi =
-    Servant.OpenApi.toOpenApi (Proxy :: Proxy API)
+    Servant.OpenApi.toOpenApi (Proxy :: Proxy (NamedRoutes API))
       & OpenApi.info . OpenApi.title .~ "Quanty API"
       & OpenApi.info . OpenApi.version .~ "0.1.0"
       & OpenApi.info . OpenApi.description
           ?~ "Options pricing and financial derivatives API"
   ```
-- [ ] Export `apiOpenApi` from `src/Api.hs`
-- [ ] Create `app/GenerateOpenApi.hs` executable:
+- [x] Export `apiOpenApi` from `src/Api.hs`
+- [x] Create `app/generate-openapi/Main.hs` executable:
 
   ```haskell
   module Main (main) where
@@ -384,7 +387,7 @@ generation (Task 8). This approach:
     putStrLn ("Generated openapi.json" :: Text)
   ```
 
-- [ ] Add executable to `package.yaml`:
+- [x] Add executable to `package.yaml`:
 
   ```yaml
   executables:
@@ -392,26 +395,26 @@ generation (Task 8). This approach:
     # ... existing Main.hs config
 
     generate-openapi:
-      main: GenerateOpenApi.hs
-      source-dirs: app
+      main: Main.hs
+      source-dirs: app/generate-openapi
       dependencies:
         - quanty
   ```
 
-- [ ] Build and run generator:
+- [x] Build and run generator:
   ```bash
-  stack build
+  stack build --fast
   stack exec generate-openapi
   ```
-- [ ] Verify `openapi.json` is created at project root
-- [ ] Verify JSON contains correct paths, schemas, and types:
+- [x] Verify `openapi.json` is created at project root
+- [x] Verify JSON contains correct paths, schemas, and types:
   ```bash
   jq . openapi.json
   ```
-- [ ] Add `openapi.json` to git (it's a build artifact but should be versioned)
-- [ ] Optionally: Add `/openapi.json` endpoint to serve spec at runtime (useful
-      for Swagger UI later)
-- [ ] Add comment to `src/Api.hs` explaining regeneration:
+- [x] Add `openapi.json` to git (it's a build artifact but should be versioned)
+- [x] Optionally: Add `/openapi.json` endpoint to serve spec at runtime (useful
+      for Swagger UI later) - SKIPPED
+- [x] Add comment to `src/Api.hs` explaining regeneration:
   ```haskell
   -- | Generate OpenAPI spec by running: stack exec generate-openapi
   -- This creates openapi.json at project root for TypeScript client generation.
@@ -428,8 +431,8 @@ generation (Task 8). This approach:
     "version": "0.1.0"
   },
   "paths": {
-    "/api/v1/health": { ... },
-    "/api/v1/placeholder": { ... }
+    "/health": { ... },
+    "/placeholder": { ... }
   },
   "components": {
     "schemas": {
@@ -559,7 +562,7 @@ components work correctly.
 - [ ] Add loading state while request is in flight
 - [ ] Add error state if request fails
 - [ ] Style the page using TailwindCSS utilities
-- [ ] Add health check indicator that calls `/api/v1/health` on mount
+- [ ] Add health check indicator that calls `/health` on mount
 - [ ] Test the full flow: click button → API call → display response
 
 **Expected UI**:
@@ -630,8 +633,7 @@ verifies all tooling works correctly.
 
 This implementation is complete when:
 
-1. ✅ Haskell backend serves `/api/v1/health` and `/api/v1/placeholder`
-   endpoints
+1. ✅ Haskell backend serves `/health` and `/placeholder` endpoints
 2. ✅ Hspec testing infrastructure is set up with auto-discovery
 3. ✅ Backend tests pass with `stack test --fast` (all endpoint tests green)
 4. ✅ Test directory structure mirrors `src/` structure

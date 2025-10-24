@@ -20,17 +20,17 @@ import Test.Hspec.Wai.JSON qualified as Hspec
 
 
 spec :: Spec
-spec = Wai.with (pure Api.app) $ do
-  describe "GET /api/v1/health" $ do
+spec = Hspec.with (pure Api.app) $ do
+  describe "GET /health" $ do
     it "responds with 200" $ do
-      Wai.get "/api/v1/health" `Hspec.shouldRespondWith` 200
+      Hspec.get "/health" `Hspec.shouldRespondWith` 200
 
     it "returns valid health status" $ do
       let expected = [Hspec.json|{status: "ok", version: "0.1.0"}|] {matchStatus = 200}
-      Hspec.get "/api/v1/health" `Hspec.shouldRespondWith` expected
+      Hspec.get "/health" `Hspec.shouldRespondWith` expected
 
     it "returns JSON with status and version fields" $ do
-      response <- Hspec.get "/api/v1/health"
+      response <- Hspec.get "/health"
       let maybeJson = Aeson.decode @Aeson.Value (Wai.simpleBody response)
       liftIO $ case maybeJson of
         Nothing -> expectationFailure "Response is not valid JSON"
@@ -39,12 +39,12 @@ spec = Wai.with (pure Api.app) $ do
           obj `shouldSatisfy` \o -> isJust (KeyMap.lookup (Key.fromString "version") o)
         Just _ -> expectationFailure "Response is not a JSON object"
 
-  describe "GET /api/v1/placeholder" $ do
+  describe "GET /placeholder" $ do
     it "responds with 200" $ do
-      Hspec.get "/api/v1/placeholder" `Hspec.shouldRespondWith` 200
+      Hspec.get "/placeholder" `Hspec.shouldRespondWith` 200
 
     it "returns JSON with message and timestamp fields" $ do
-      response <- Hspec.get "/api/v1/placeholder"
+      response <- Hspec.get "/placeholder"
       let maybeJson = Aeson.decode @Aeson.Value (Wai.simpleBody response)
       liftIO $ case maybeJson of
         Nothing -> expectationFailure "Response is not valid JSON"
@@ -54,7 +54,7 @@ spec = Wai.with (pure Api.app) $ do
         Just _ -> expectationFailure "Response is not a JSON object"
 
     it "returns expected message text" $ do
-      response <- Hspec.get "/api/v1/placeholder"
+      response <- Hspec.get "/placeholder"
       let maybeJson = Aeson.decode @Api.PlaceholderResponse (Wai.simpleBody response)
       liftIO $ case maybeJson of
         Nothing -> expectationFailure "Response is not valid PlaceholderResponse"

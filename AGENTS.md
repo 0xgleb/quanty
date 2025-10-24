@@ -78,6 +78,15 @@ change.
   - All checks (tests, hlint, fourmolu, prettier, eslint) SHOULD pass at the end
     of each task whenever possible
   - Focused git diffs and passing checks make reviewing much easier
+- **CRITICAL: Always verify checks pass before claiming work is complete**
+  - ALWAYS run `stack build --fast` and `stack test --fast` before submitting
+    Haskell code for review
+  - ALWAYS run `pnpm lint` and `pnpm format` before submitting TypeScript code
+    for review
+  - NEVER claim that work is complete or ready for review without running all
+    relevant checks
+  - If checks fail, fix the issues before informing the user
+  - The user should never discover failing checks - you must catch them first
 - Update PLAN.md every time you complete a task by marking checkboxes as `[x]`
 - Keep PLAN.md concise - just tick off checkboxes, do not add "Changes Made"
   sections or verbose changelogs
