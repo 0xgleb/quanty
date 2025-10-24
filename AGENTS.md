@@ -95,6 +95,10 @@ change.
 ### Before creating a PR
 
 - **CRITICAL**: Delete PLAN.md before submitting changes for review
+  - **A PR containing PLAN.md is NOT ready for review**
+  - PLAN.md must be removed from the working tree AND from git history (if
+    accidentally committed)
+  - Use `git rm PLAN.md` to remove it properly
 - PLAN.md is a transient development file that should ONLY exist on development
   branches
 - PLAN.md should NEVER appear in pull requests or be merged to main/master
