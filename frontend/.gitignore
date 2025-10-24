@@ -21,3 +21,9 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# OpenAPI TypeScript generator error logs
+openapi-ts-error-*.log
+
+# Generated API client (regenerate with: pnpm generate-client)
+src/lib/api/generated/

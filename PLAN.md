@@ -464,12 +464,12 @@ server.
 
 ### Subtasks
 
-- [ ] Install client generator in frontend:
+- [x] Install client generator in frontend:
   ```bash
   cd frontend
   pnpm add -D @hey-api/openapi-ts
   ```
-- [ ] Create `frontend/openapi-ts.config.ts`:
+- [x] Create `frontend/openapi-ts.config.ts`:
 
   ```typescript
   import { defineConfig } from "@hey-api/openapi-ts";
@@ -481,7 +481,7 @@ server.
   });
   ```
 
-- [ ] Add npm script to `frontend/package.json`:
+- [x] Add npm script to `frontend/package.json`:
   ```json
   {
     "scripts": {
@@ -489,19 +489,19 @@ server.
     }
   }
   ```
-- [ ] Generate TypeScript client:
+- [x] Generate TypeScript client:
   ```bash
   cd frontend
   pnpm generate-client
   ```
-- [ ] Verify generated files in `frontend/src/lib/api/generated/`:
-  - `types.ts` - TypeScript types for all API models
-  - `services.ts` - API client functions
-  - `core/` - Internal client implementation
-- [ ] Create wrapper `frontend/src/lib/api/client.ts`:
+- [x] Verify generated files in `frontend/src/lib/api/generated/`:
+  - `types.gen.ts` - TypeScript types for all API models
+  - `sdk.gen.ts` - API client functions
+  - `client/` and `core/` - Internal client implementation
+- [x] Create wrapper `frontend/src/lib/api/client.ts`:
 
   ```typescript
-  import { client } from "./generated";
+  import { client } from "./generated/client.gen";
 
   // Configure base URL
   client.setConfig({
@@ -509,14 +509,12 @@ server.
   });
 
   export { client };
-  export * from "./generated/types";
-  export * from "./generated/services";
+  export * from "./generated";
   ```
 
-- [ ] Commit generated files (do NOT add to `.gitignore` - generated code should
-      be versioned)
-- [ ] Test importing in a `.svelte` file to verify types work
-- [ ] Update `README.md` with client generation workflow:
+- [x] Add generated files to `.gitignore` (artifacts should not be versioned)
+- [x] Test importing in a `.svelte` file to verify types work
+- [x] Update `README.md` with client generation workflow:
   - Full command:
     `stack exec generate-openapi && cd frontend && pnpm generate-client`
   - When to regenerate: after changing Haskell API types

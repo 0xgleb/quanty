@@ -138,6 +138,48 @@ pnpm preview             # Preview production build
 pnpm test                # Run tests
 pnpm lint                # Lint code
 pnpm format              # Format code
+pnpm generate-client     # Generate TypeScript API client from OpenAPI spec
+```
+
+### API Client Generation
+
+The frontend TypeScript API client is automatically generated from the Haskell
+backend's OpenAPI specification. This ensures type-safe end-to-end communication
+between frontend and backend.
+
+**When to regenerate the client**:
+
+- After changing API types in Haskell
+- After adding or removing API endpoints
+- After modifying request/response structures
+
+**Full regeneration workflow**:
+
+```bash
+# 1. Generate OpenAPI spec from Haskell API
+stack exec generate-openapi
+
+# 2. Generate TypeScript client from OpenAPI spec
+cd frontend && pnpm generate-client
+```
+
+**What gets generated**:
+
+- `frontend/src/lib/api/generated/types.gen.ts` - TypeScript types for all API
+  models
+- `frontend/src/lib/api/generated/sdk.gen.ts` - Fully-typed API client functions
+- `frontend/src/lib/api/client.ts` - Configured client wrapper (manual, not
+  generated)
+
+**Usage in components**:
+
+```typescript
+import { getHealth, getPlaceholder } from "$lib/api/client";
+import type { HealthResponse, PlaceholderResponse } from "$lib/api/client";
+
+// Fully typed API calls
+const health = await getHealth(); // health: HealthResponse
+const data = await getPlaceholder(); // data: PlaceholderResponse
 ```
 
 ### Code Quality
