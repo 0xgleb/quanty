@@ -21,7 +21,7 @@ dependencies:
   - time
   - text
 
-language: GHC2021
+language: GHC2024
 
 library:
   source-dirs: src
@@ -63,13 +63,11 @@ ghc-options:
   - -Wredundant-constraints
 
 default-extensions:
-  # Extensions NOT in GHC2021 that we use
+  # Extensions NOT in GHC2024 that we use
   - ApplicativeDo
   - BlockArguments
-  - DataKinds
   - DeriveAnyClass
   - DerivingVia
-  - LambdaCase
   - NoImplicitPrelude
   - OverloadedStrings
   - QuasiQuotes

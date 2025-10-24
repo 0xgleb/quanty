@@ -15,11 +15,12 @@ This implementation follows a vertical slice approach:
 5. Configure TypeScript tooling (prettier, eslint) following patterns from
    metagenda/strike
 6. Set up shadcn-svelte with TailwindCSS
-7. Create TypeScript API client for backend communication
-8. Build placeholder frontend page that calls the backend and displays the
+7. Add OpenAPI generation to backend (servant-openapi3)
+8. Generate TypeScript client from OpenAPI spec (@hey-api/openapi-ts)
+9. Build placeholder frontend page that calls the backend and displays the
    response
-9. Update documentation and verify the full implementation
-10. Final cleanup and validation
+10. Update documentation and verify the full implementation
+11. Final cleanup and validation
 
 **Key Design Decisions**:
 
@@ -450,16 +451,16 @@ generation (Task 8). This approach:
 ## Task 8. Generate TypeScript Client from OpenAPI Spec
 
 Use `@hey-api/openapi-ts` to generate fully-typed TypeScript client from the
-OpenAPI specification.
+OpenAPI specification file.
 
-**Rationale**: The OpenAPI spec from Task 7 enables automatic generation of
-TypeScript types and API client functions. `@hey-api/openapi-ts` is the
+**Rationale**: The `openapi.json` file from Task 7 enables automatic generation
+of TypeScript types and API client functions. `@hey-api/openapi-ts` is the
 actively-maintained modern tool for this purpose (replaces deprecated
-openapi-typescript-codegen).
+openapi-typescript-codegen). Reading from file is simpler than hitting a running
+server.
 
 ### Subtasks
 
-- [ ] Ensure backend is running (`stack run` in separate terminal)
 - [ ] Install client generator in frontend:
   ```bash
   cd frontend
@@ -471,7 +472,7 @@ openapi-typescript-codegen).
   import { defineConfig } from "@hey-api/openapi-ts";
 
   export default defineConfig({
-    input: "http://localhost:8080/api/v1/openapi.json",
+    input: "../openapi.json",
     output: "src/lib/api/generated",
     client: "fetch",
   });
@@ -487,6 +488,7 @@ openapi-typescript-codegen).
   ```
 - [ ] Generate TypeScript client:
   ```bash
+  cd frontend
   pnpm generate-client
   ```
 - [ ] Verify generated files in `frontend/src/lib/api/generated/`:
@@ -511,7 +513,10 @@ openapi-typescript-codegen).
 - [ ] Commit generated files (do NOT add to `.gitignore` - generated code should
       be versioned)
 - [ ] Test importing in a `.svelte` file to verify types work
-- [ ] Add documentation comment in `src/Api.hs` explaining regeneration process
+- [ ] Update `README.md` with client generation workflow:
+  - Full command:
+    `stack exec generate-openapi && cd frontend && pnpm generate-client`
+  - When to regenerate: after changing Haskell API types
 
 **Expected Generated Client Usage**:
 
@@ -526,11 +531,12 @@ const data = await DefaultService.getApiV1Placeholder();
 // data: PlaceholderResponse = { message: string, timestamp: string }
 ```
 
-**When to Regenerate**:
+**Full Regeneration Workflow**:
 
-- After changing Haskell API types or adding/removing endpoints
-- Command: `pnpm generate-client` (requires backend running)
-- The generated code should be committed to git
+1. Make changes to Haskell API types in `src/Api.hs`
+2. Run `stack exec generate-openapi` to update `openapi.json`
+3. Run `cd frontend && pnpm generate-client` to update TypeScript client
+4. Commit both `openapi.json` and generated TypeScript files
 
 ---
 
@@ -567,7 +573,7 @@ components work correctly.
 
 ---
 
-## Task 9. Documentation and Testing
+## Task 10. Documentation and Testing
 
 Update documentation and verify the implementation.
 
@@ -597,7 +603,7 @@ understand the setup. Testing ensures everything works correctly.
 
 ---
 
-## Task 10. Final Cleanup and Validation
+## Task 11. Final Cleanup and Validation
 
 Ensure the implementation is production-ready and follows all guidelines.
 
@@ -656,7 +662,8 @@ This implementation is complete when:
 - Package-by-feature organization will be enforced starting in Phase 1
   (Black-Scholes module)
 - For now, `src/Api.hs` can contain the simple placeholder endpoint
-- The TypeScript API client types are manual for now; type generation from
-  Servant comes later
+- TypeScript types and API client are auto-generated from Servant API via
+  OpenAPI 3.0 spec (`servant-openapi3` → `@hey-api/openapi-ts`)
+- Generated code is committed to git (both `openapi.json` and TypeScript client)
 - CORS configuration may be needed if frontend/backend run on different ports
   (will handle when testing)

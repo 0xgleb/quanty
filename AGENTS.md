@@ -267,13 +267,10 @@ guidelines.
 **Language Extensions**:
 
 - **CRITICAL**: DO NOT enable language extensions that are already enabled
-  project-wide in `package.yaml` or by **GHC2021**
-- GHC2021 includes: `ConstraintKinds`, `PolyKinds`, `RankNTypes`,
-  `TypeApplications`, `GADTs`, `ImportQualifiedPost`,
-  `StandaloneKindSignatures`, and many more
-- Check `package.yaml` `default-extensions` section before adding
-  `{-# LANGUAGE #-}` pragmas
-- Only add pragmas for extensions specific to a single module (rare)
+  project-wide in `package.yaml` or by **GHC2024**
+- See "GHC Configuration" section below for available extensions
+- Only add `{-# LANGUAGE #-}` pragmas for extensions specific to a single module
+  (rare)
 
 **Modern Record Handling**:
 
@@ -282,13 +279,39 @@ guidelines.
 - `OverloadedRecordDot` - Use `record.field` syntax (clean, no name conflicts)
 - Example: `user.name` instead of `name user`
 
-**Future Features** (document but use when needed):
+**Type-Level Programming with TypeAbstractions**:
 
-- **Effectful** - Modern effect system (use when complex effect handling needed)
+- **CRITICAL**: Use `@`-binders instead of `ScopedTypeVariables` for all new
+  code
+- TypeAbstractions provides principled type variable binding with better
+  scoping:
+  ```haskell
+  id @t x = x :: t  -- binds type variable at use site
+  ```
+- Pattern matching on existential types:
+  ```haskell
+  matchType (TList @elem rep) = "List of " ++ matchType rep
+  ```
+- Works correctly with type synonyms where ScopedTypeVariables fails
+- Enables binding type variables under non-injective type constructors
+- **Type family arity**: Always specify arity explicitly:
+  ```haskell
+  type P @k = Proxy @k  -- declares P takes one invisible argument
+  ```
+- Use `StandaloneKindSignatures` for complex type families
+
+**Advanced Type-Level Features** (available when needed):
+
+- **RequiredTypeArguments** (experimental) - Visible dependent quantification
+  using `forall a ->` syntax:
+  ```haskell
+  sizeOf :: forall a -> Storable a => Int
+  -- Call as: sizeOf Bool  (no Proxy needed)
+  ```
 - **LinearTypes** - Resource safety (`%1 ->` for linear functions)
 - **TypeData** - Compile-time-only types for type-level programming
-- **TypeAbstractions** - Explicit type variable binding with `@`-binders
 - **ExtendedLiterals** - Direct syntax for sized numerics (`123i8`, `1000w16`)
+- **Effectful** - Modern effect system (use when complex effect handling needed)
 
 **Extensive Test Coverage**:
 
@@ -380,21 +403,30 @@ Important Haskell types (see [SPEC.md](SPEC.md) for full definitions):
 
 ### GHC Configuration
 
-The project uses **GHC2021** as the language baseline, providing 48 modern
-extensions by default.
+The project uses **GHC2024** language edition, providing modern type system
+features.
 
-- `-Wall -Werror`: All warnings are errors
-- **Language**: `GHC2021` - Modern Haskell baseline (replaces extension
-  boilerplate)
-- `NoImplicitPrelude`: Uses Protolude instead of base Prelude
+**Language Configuration**:
 
-Additional extensions beyond GHC2021:
+- **Language Edition**: `GHC2024` (configured in `package.yaml`)
+- **Warnings**: `-Wall -Werror` (all warnings are errors)
+- **Prelude**: `NoImplicitPrelude` (uses Protolude)
+
+**Key GHC2024 Extensions Available**:
+
+- Type system: `GADTs`, `DataKinds`, `TypeApplications`, `RankNTypes`,
+  `StandaloneKindSignatures`
+- Deriving: `DerivingStrategies`, `DeriveGeneric`, `DeriveAnyClass`
+- Syntax: `LambdaCase`, `ImportQualifiedPost`, `ExplicitNamespaces`
+- Records: `DisambiguateRecordFields`
+
+**Additional Project Extensions** (see `package.yaml`):
 
 - `DuplicateRecordFields`, `NoFieldSelectors`, `OverloadedRecordDot` - Modern
   record handling
-- `BlockArguments`, `LambdaCase`, `ViewPatterns` - Syntax conveniences
-- `DataKinds`, `TypeFamilyDependencies` - Type-level programming
-- See `package.yaml` for complete list
+- `TypeFamilyDependencies` - Type family injectivity
+- `DerivingVia` - Deriving via newtype coercion
+- `OverloadedStrings`, `QuasiQuotes`, `RecordWildCards` - Syntax conveniences
 
 ## Development Workflow
 

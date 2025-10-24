@@ -1,15 +1,13 @@
 # HLint configuration for Quanty
 # Matches language settings from package.yaml
 
-# Use GHC2021 as the base language
+# Use GHC2024 as the base language
 - arguments:
-    - --language=GHC2021
+    - --language=GHC2024
     - --extension=ApplicativeDo
     - --extension=BlockArguments
-    - --extension=DataKinds
     - --extension=DeriveAnyClass
     - --extension=DerivingVia
-    - --extension=LambdaCase
     - --extension=NoImplicitPrelude
     - --extension=OverloadedStrings
     - --extension=QuasiQuotes
