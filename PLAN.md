@@ -308,34 +308,233 @@ frontend/src/lib/
 
 ---
 
-## Task 7. Create API Client
+## Task 7. Add OpenAPI Generation to Backend
 
-Build a TypeScript API client for communicating with the Haskell backend.
+Generate OpenAPI 3.0 specification from Servant API using `servant-openapi3`.
 
-**Rationale**: Centralizing API calls in a client module makes it easier to
-maintain, test, and eventually generate types from the Haskell API.
+**Rationale**: Instead of manually writing TypeScript types, we leverage
+Servant's type-level API to generate an OpenAPI spec. This spec becomes the
+single source of truth for API types and enables automatic TypeScript client
+generation (Task 8). This approach:
+
+- Eliminates manual type definitions and synchronization bugs
+- Provides documented API spec useful for testing tools and Swagger UI
+- Follows industry-standard OpenAPI ecosystem
+- More maintainable than direct Servant→TypeScript libraries (servant-typescript
+  has minimal maintenance)
+- Uses separate executable for generation (no need to run server)
 
 ### Subtasks
 
-- [ ] Create `frontend/src/lib/api/client.ts` with base API URL configuration
-- [ ] Define TypeScript types matching backend responses:
-  ```typescript
-  export type HealthResponse = { status: string; version: string };
-  export type PlaceholderResponse = { message: string; timestamp: string };
+- [ ] Add dependencies to `package.yaml`:
+  ```yaml
+  dependencies:
+    - servant-openapi3
+    - openapi3
   ```
-- [ ] Implement `fetchHealth()` function using native `fetch`
-- [ ] Implement `fetchPlaceholder()` function
-- [ ] Add error handling for network failures and non-200 responses
-- [ ] Add JSDoc comments explaining each function
-- [ ] Test API client functions manually in browser console
+- [ ] Run `stack build` to install new dependencies
+- [ ] Update `src/Api.hs` imports:
+  ```haskell
+  import Data.OpenApi (ToSchema)
+  import Data.OpenApi qualified as OpenApi
+  import Servant.OpenApi qualified
+  ```
+- [ ] Derive `ToSchema` instances for response types:
 
-**Design Note**: For now, use manual type definitions. In future tasks, we'll
-generate TypeScript types from Servant API using `servant-typescript` or similar
-tools.
+  ```haskell
+  data HealthResponse = HealthResponse
+    { status :: Text
+    , version :: Text
+    } deriving stock (Generic, Show, Eq)
+      deriving anyclass (Aeson.ToJSON, Aeson.FromJSON, ToSchema)
+
+  data PlaceholderResponse = PlaceholderResponse
+    { message :: Text
+    , timestamp :: Text
+    } deriving stock (Generic, Show, Eq)
+      deriving anyclass (Aeson.ToJSON, Aeson.FromJSON, ToSchema)
+  ```
+
+- [ ] Create `apiOpenApi` function in `src/Api.hs`:
+  ```haskell
+  apiOpenApi :: OpenApi.OpenApi
+  apiOpenApi =
+    Servant.OpenApi.toOpenApi (Proxy :: Proxy API)
+      & OpenApi.info . OpenApi.title .~ "Quanty API"
+      & OpenApi.info . OpenApi.version .~ "0.1.0"
+      & OpenApi.info . OpenApi.description
+          ?~ "Options pricing and financial derivatives API"
+  ```
+- [ ] Export `apiOpenApi` from `src/Api.hs`
+- [ ] Create `app/GenerateOpenApi.hs` executable:
+
+  ```haskell
+  module Main (main) where
+
+  import Protolude
+  import Data.Aeson qualified as Aeson
+  import Data.ByteString.Lazy qualified as LBS
+  import Api (apiOpenApi)
+
+  main :: IO ()
+  main = do
+    let openApiJson = Aeson.encode apiOpenApi
+    LBS.writeFile "openapi.json" openApiJson
+    putStrLn ("Generated openapi.json" :: Text)
+  ```
+
+- [ ] Add executable to `package.yaml`:
+
+  ```yaml
+  executables:
+    quanty-exe:
+    # ... existing Main.hs config
+
+    generate-openapi:
+      main: GenerateOpenApi.hs
+      source-dirs: app
+      dependencies:
+        - quanty
+  ```
+
+- [ ] Build and run generator:
+  ```bash
+  stack build
+  stack exec generate-openapi
+  ```
+- [ ] Verify `openapi.json` is created at project root
+- [ ] Verify JSON contains correct paths, schemas, and types:
+  ```bash
+  jq . openapi.json
+  ```
+- [ ] Add `openapi.json` to git (it's a build artifact but should be versioned)
+- [ ] Optionally: Add `/openapi.json` endpoint to serve spec at runtime (useful
+      for Swagger UI later)
+- [ ] Add comment to `src/Api.hs` explaining regeneration:
+  ```haskell
+  -- | Generate OpenAPI spec by running: stack exec generate-openapi
+  -- This creates openapi.json at project root for TypeScript client generation.
+  apiOpenApi :: OpenApi.OpenApi
+  ```
+
+**Expected OpenAPI Output Structure**:
+
+```json
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Quanty API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health": { ... },
+    "/api/v1/placeholder": { ... }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": { ... },
+      "PlaceholderResponse": { ... }
+    }
+  }
+}
+```
+
+**When to Regenerate**:
+
+- After changing API types or adding/removing endpoints
+- Command: `stack exec generate-openapi`
+- Commit the updated `openapi.json`
 
 ---
 
-## Task 8. Build Placeholder Frontend Page
+## Task 8. Generate TypeScript Client from OpenAPI Spec
+
+Use `@hey-api/openapi-ts` to generate fully-typed TypeScript client from the
+OpenAPI specification.
+
+**Rationale**: The OpenAPI spec from Task 7 enables automatic generation of
+TypeScript types and API client functions. `@hey-api/openapi-ts` is the
+actively-maintained modern tool for this purpose (replaces deprecated
+openapi-typescript-codegen).
+
+### Subtasks
+
+- [ ] Ensure backend is running (`stack run` in separate terminal)
+- [ ] Install client generator in frontend:
+  ```bash
+  cd frontend
+  pnpm add -D @hey-api/openapi-ts
+  ```
+- [ ] Create `frontend/openapi-ts.config.ts`:
+
+  ```typescript
+  import { defineConfig } from "@hey-api/openapi-ts";
+
+  export default defineConfig({
+    input: "http://localhost:8080/api/v1/openapi.json",
+    output: "src/lib/api/generated",
+    client: "fetch",
+  });
+  ```
+
+- [ ] Add npm script to `frontend/package.json`:
+  ```json
+  {
+    "scripts": {
+      "generate-client": "openapi-ts"
+    }
+  }
+  ```
+- [ ] Generate TypeScript client:
+  ```bash
+  pnpm generate-client
+  ```
+- [ ] Verify generated files in `frontend/src/lib/api/generated/`:
+  - `types.ts` - TypeScript types for all API models
+  - `services.ts` - API client functions
+  - `core/` - Internal client implementation
+- [ ] Create wrapper `frontend/src/lib/api/client.ts`:
+
+  ```typescript
+  import { client } from "./generated";
+
+  // Configure base URL
+  client.setConfig({
+    baseUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8080",
+  });
+
+  export { client };
+  export * from "./generated/types";
+  export * from "./generated/services";
+  ```
+
+- [ ] Commit generated files (do NOT add to `.gitignore` - generated code should
+      be versioned)
+- [ ] Test importing in a `.svelte` file to verify types work
+- [ ] Add documentation comment in `src/Api.hs` explaining regeneration process
+
+**Expected Generated Client Usage**:
+
+```typescript
+import { DefaultService } from "$lib/api/client";
+
+// Fully typed API calls
+const health = await DefaultService.getApiV1Health();
+// health: HealthResponse = { status: string, version: string }
+
+const data = await DefaultService.getApiV1Placeholder();
+// data: PlaceholderResponse = { message: string, timestamp: string }
+```
+
+**When to Regenerate**:
+
+- After changing Haskell API types or adding/removing endpoints
+- Command: `pnpm generate-client` (requires backend running)
+- The generated code should be committed to git
+
+---
+
+## Task 9. Build Placeholder Frontend Page
 
 Create a simple home page that calls the backend and displays results using
 shadcn components.
