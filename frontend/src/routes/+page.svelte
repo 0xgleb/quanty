@@ -2,10 +2,10 @@
   import { Button } from "$lib/components/ui/button"
   import * as Card from "$lib/components/ui/card"
   import { getHealth, getPlaceholder } from "$lib/api/effectClient"
-  import { createQueryFx, createMutationFx } from "$lib/query"
+  import { createQuery, createMutation } from "$lib/query.svelte"
 
-  const healthQuery = createQueryFx(["health"] as const, getHealth)
-  const placeholderMutation = createMutationFx(getPlaceholder)
+  const healthQuery = createQuery(getHealth)
+  const placeholderMutation = createMutation(getPlaceholder)
 
   const healthVersion = $derived(healthQuery.data?.version ?? null)
   const backendAvailable = $derived(healthQuery.isSuccess)

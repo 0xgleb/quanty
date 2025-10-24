@@ -594,24 +594,24 @@ understand the setup. Testing ensures everything works correctly.
 
 ### Subtasks
 
-- [ ] Update `README.md` with frontend setup instructions:
+- [x] Update `README.md` with frontend setup instructions:
   - Explain pnpm workspace setup
   - How to install dependencies (`pnpm install` from root)
   - How to run dev server (`pnpm dev` from root)
   - How to format/lint (`pnpm format`, `pnpm lint` from root)
   - Mention that frontend code lives in `frontend/` but commands run from root
-- [ ] Add workspace commands to "Development Commands" section
-- [ ] Update `SPEC.md` if needed (API endpoint documentation)
-- [ ] Test full development workflow from root:
-  - [ ] Start backend: `stack run`
-  - [ ] Start frontend: `pnpm dev` (from root, not from frontend/)
-  - [ ] Verify health check works
-  - [ ] Verify placeholder endpoint works
-  - [ ] Verify UI displays data correctly
-- [ ] Test that pre-commit hooks work on frontend files
-- [ ] Verify that `nix develop` provides all necessary tools for frontend
+- [x] Add workspace commands to "Development Commands" section
+- [x] Update `SPEC.md` if needed (API endpoint documentation)
+- [x] Test full development workflow from root:
+  - [x] Start backend: `stack run`
+  - [x] Start frontend: `pnpm dev` (from root, not from frontend/)
+  - [x] Verify health check works
+  - [x] Verify placeholder endpoint works
+  - [x] Verify UI displays data correctly
+- [x] Test that pre-commit hooks work on frontend files
+- [x] Verify that `nix develop` provides all necessary tools for frontend
       development
-- [ ] Clean up any unnecessary files from initial SvelteKit template
+- [x] Clean up any unnecessary files from initial SvelteKit template
 
 ---
 
@@ -624,16 +624,16 @@ verifies all tooling works correctly.
 
 ### Subtasks
 
-- [ ] Run `pnpm format` from root (formats frontend code via workspace)
-- [ ] Run `pnpm lint` and fix any issues
-- [ ] Run `fourmolu --mode inplace` on all Haskell files
-- [ ] Run `hlint` on all Haskell files and fix suggestions
-- [ ] Build backend: `stack build` (verify no warnings)
-- [ ] Build frontend: `pnpm build` from root (verify build succeeds)
-- [ ] Remove any unused dependencies from `frontend/package.json`
-- [ ] Remove any unused imports or dead code
-- [ ] Verify all files pass pre-commit hooks
-- [ ] Verify git hooks configuration in `flake.nix` works with `frontend/`
+- [x] Run `pnpm format` from root (formats frontend code via workspace)
+- [x] Run `pnpm lint` and fix any issues
+- [x] Run `fourmolu --mode inplace` on all Haskell files
+- [x] Run `hlint` on all Haskell files and fix suggestions
+- [x] Build backend: `stack build` (verify no warnings)
+- [x] Build frontend: `pnpm build` from root (verify build succeeds)
+- [x] Remove any unused dependencies from `frontend/package.json`
+- [x] Remove any unused imports or dead code
+- [x] Verify all files pass pre-commit hooks
+- [x] Verify git hooks configuration in `flake.nix` works with `frontend/`
       structure:
   - Check that `prettier` and `eslint` hooks find files in `frontend/` directory
   - Verify prettier config from `frontend/package.json` is being picked up
@@ -641,8 +641,8 @@ verifies all tooling works correctly.
     pre-commit hooks
   - If hooks don't work correctly, update `flake.nix` hook configuration to
     specify paths
-- [ ] Test production build: `pnpm preview` from root
-- [ ] Create a git commit (do not push yet - wait for review)
+- [x] Test production build: `pnpm preview` from root
+- [x] Create a git commit (do not push yet - wait for review)
 
 ---
 

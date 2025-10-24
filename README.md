@@ -74,31 +74,24 @@ options, real-time market data, and advanced analytics.
 
    This provides GHC, Stack, Node.js, pnpm, and all necessary tools.
 
-3. **Build the backend**:
+3. **Install dependencies**:
 
    ```bash
-   stack build
+   stack build              # Backend dependencies
+   cd frontend && pnpm install   # Frontend dependencies
    ```
 
-4. **Install frontend dependencies**:
-
-   ```bash
-   cd frontend
-   pnpm install
-   ```
-
-5. **Run the development servers**:
+4. **Run the development servers**:
 
    ```bash
    # Terminal 1: Backend API server
-   stack run
+   stack run quanty-exe
 
    # Terminal 2: Frontend dev server
-   cd frontend
-   pnpm dev
+   cd frontend && pnpm dev
    ```
 
-6. **Access the application**: Open
+5. **Access the application**: Open
    [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Development Commands
@@ -128,6 +121,8 @@ hlint <file>.hs          # Lint code
 - Run tests with `stack test --fast` during development
 
 ### Frontend (TypeScript/Svelte)
+
+All frontend commands must be run from the `frontend/` directory:
 
 ```bash
 cd frontend

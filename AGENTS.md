@@ -452,6 +452,15 @@ features.
 
 ### Code Quality Standards
 
+**CRITICAL: Never bypass quality checks without explicit user permission**:
+
+- **NEVER** disable lints with `eslint-disable` comments without permission
+- **NEVER** skip or ignore failing tests without permission
+- **NEVER** bypass formatters, type checkers, or other quality checks without
+  permission
+- **NEVER** commit code with known warnings or errors without permission
+- If a check fails, fix the issue properly or ask for permission to bypass it
+
 **Never**:
 
 - Use `#[allow(clippy::*)]` without explicit permission (wrong language but
