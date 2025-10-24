@@ -19,6 +19,7 @@ dependencies:
   - aeson
   - wai
   - wai-extra
+  - wai-cors
   - warp
   - time
   - text

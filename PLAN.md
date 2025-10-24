@@ -552,16 +552,27 @@ components work correctly.
 
 ### Subtasks
 
-- [ ] Update `frontend/src/routes/+page.svelte` to create home page
-- [ ] Add page title and description
-- [ ] Use Svelte 5 runes (`$state`, `$derived`, `$effect`) for reactive state
-- [ ] Create button that calls `fetchPlaceholder()` on click
-- [ ] Display API response in a shadcn Card component
-- [ ] Add loading state while request is in flight
-- [ ] Add error state if request fails
-- [ ] Style the page using TailwindCSS utilities
-- [ ] Add health check indicator that calls `/health` on mount
-- [ ] Test the full flow: click button → API call → display response
+- [x] Update `frontend/src/routes/+page.svelte` to create home page
+- [x] Add page title and description
+- [x] Use Svelte 5 runes (`$state`, `$derived`) for reactive state
+- [x] Create button that calls `fetchPlaceholder()` on click
+- [x] Display API response in a shadcn Card component
+- [x] Add loading state while request is in flight
+- [x] Add error state if request fails
+- [x] Style the page using TailwindCSS utilities
+- [x] Add health check indicator that calls `/health` on mount
+- [x] Clean up demo routes, components, and assets
+- [x] Enable dark theme (class="dark" on html element)
+- [x] Add CORS middleware to backend for frontend access
+- [x] Test the full flow: click button → API call → display response (user
+      confirmed working)
+- [x] Set up vitest testing infrastructure with proper configuration
+- [x] Create Effect-based API client wrapper for type-safe error handling
+- [x] Extract business logic to separate `.ts` module (home.ts)
+- [x] Use Effect.match for FP-style error handling (no try/catch)
+- [x] Use tagged union types for state management
+- [x] Use arrow functions instead of function declarations
+- [x] Create mock helpers for testing API responses
 
 **Expected UI**:
 
@@ -622,6 +633,14 @@ verifies all tooling works correctly.
 - [ ] Remove any unused dependencies from `frontend/package.json`
 - [ ] Remove any unused imports or dead code
 - [ ] Verify all files pass pre-commit hooks
+- [ ] Verify git hooks configuration in `flake.nix` works with `frontend/`
+      structure:
+  - Check that `prettier` and `eslint` hooks find files in `frontend/` directory
+  - Verify prettier config from `frontend/package.json` is being picked up
+  - Test by making a change to a frontend file and running `git add` +
+    pre-commit hooks
+  - If hooks don't work correctly, update `flake.nix` hook configuration to
+    specify paths
 - [ ] Test production build: `pnpm preview` from root
 - [ ] Create a git commit (do not push yet - wait for review)
 

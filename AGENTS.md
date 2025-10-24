@@ -339,6 +339,8 @@ guidelines.
 - Prefer `Effect.gen` over Promise/async-await for async flows
 - Use Layers for composable service configuration
 - All API calls return `Effect<Data, Error, Requirements>`
+- **Naming convention**: Use `Fx` suffix for Effect-based wrappers (e.g.,
+  `createQueryFx`, `createMutationFx`)
 
 **Effect Patterns**:
 

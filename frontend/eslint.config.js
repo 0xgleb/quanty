@@ -60,6 +60,8 @@ export default [
       "node_modules/**",
       "*.config.js",
       "*.config.ts",
+      "src/lib/api/generated/**",
+      "test-setup.ts",
     ],
   },
 ]
