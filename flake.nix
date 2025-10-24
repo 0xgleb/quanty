@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
     git-hooks.url = "github:cachix/git-hooks.nix";
@@ -32,7 +32,10 @@
           prettier.enable = true;
 
           # Misc
-          denofmt.enable = true;
+          denofmt = {
+            enable = true;
+            excludes = [ ".*\\.ts$" ".*\\.js$" ".*\\.json$" ];
+          };
           shellcheck.enable = true;
         };
 

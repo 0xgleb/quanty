@@ -10,16 +10,58 @@ dependencies:
   - base >= 4.14.4.0 && < 5
   - protolude
   - hspec
+  - hspec-wai
+  - hspec-wai-json
+  - servant-server
+  - servant
+  - servant-openapi3
+  - openapi3
+  - aeson
+  - wai
+  - wai-extra
+  - wai-cors
+  - warp
+  - time
+  - text
+  - bytestring
+  - lens
 
-tests:
-  options-tests:
-    main: OptionsPricing.hs
-    source-dirs: .
+language: GHC2024
+
+library:
+  source-dirs: src
+
+executables:
+  quanty-exe:
+    main: Main.hs
+    source-dirs: app
     ghc-options:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -O2
+    dependencies:
+      - quanty
+
+  generate-openapi:
+    main: GenerateOpenApi.hs
+    source-dirs: app
+    ghc-options:
+      - -main-is GenerateOpenApi
+    dependencies:
+      - quanty
+
+tests:
+  quanty-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - quanty
+    build-tools:
+      - hspec-discover
 
 ghc-options:
   - -Wall
@@ -34,34 +76,18 @@ ghc-options:
   - -Wredundant-constraints
 
 default-extensions:
+  # Extensions NOT in GHC2024 that we use
   - ApplicativeDo
   - BlockArguments
-  - ConstraintKinds
-  - DeriveGeneric
-  - DeriveLift
-  - DeriveTraversable # Implies: DeriveFoldable, DeriveFunctor
-  - DerivingVia # Implies: DerivingStrategies
-  - FlexibleContexts
-  - GADTs
-  - GeneralizedNewtypeDeriving
-  - ImportQualifiedPost
-  - InstanceSigs
-  - LambdaCase
-  - MultiParamTypeClasses
-  - NamedFieldPuns
+  - DeriveAnyClass
+  - DerivingVia
   - NoImplicitPrelude
-  - NoStarIsType
   - OverloadedStrings
   - QuasiQuotes
-  - RankNTypes # Implies: ExplicitForAll
-  - RecordWildCards # Implies: DisambiguateRecordFields
-  - ScopedTypeVariables # Implies: ExplicitForAll
-  - StandaloneDeriving
-  - TupleSections
-  - TypeApplications
-  - TypeFamilyDependencies # Implies: TypeFamilies
-  - DataKinds
-  - KindSignatures
-  - PolyKinds
-  - TypeOperators
+  - RecordWildCards
+  - TypeFamilyDependencies
   - ViewPatterns
+  # Modern record handling
+  - DuplicateRecordFields
+  - NoFieldSelectors
+  - OverloadedRecordDot

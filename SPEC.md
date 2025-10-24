@@ -38,16 +38,20 @@ computation and a TypeScript/Svelte frontend for modern web UX.
 
 #### Backend
 
-**Language**: Haskell with Protolude
+**Language**: Haskell with GHC2024 + Protolude
 
+- **GHC2024** language baseline with modern type system features
 - Strong static typing prevents runtime errors
 - Pure functions enable easy testing and reasoning
 - Lazy evaluation for efficient computation
 - `NoImplicitPrelude` with Protolude for modern Haskell
+- Modern record handling (`OverloadedRecordDot`, `DuplicateRecordFields`,
+  `NoFieldSelectors`)
 
-**Web Framework**: Servant
+**Web Framework**: Servant with NamedRoutes
 
-- Type-level API specification
+- **NamedRoutes** pattern for explicit, named API handlers
+- Type-level API specification with better error messages
 - Automatic API documentation generation
 - Type-safe routing and request handling
 - Built-in support for content negotiation (JSON, HTML)
@@ -67,8 +71,10 @@ components
 
 **Styling**: TailwindCSS - Utility-first CSS framework
 
-**Type Safety**: TypeScript - End-to-end type safety with generated types from
-backend
+**Type Safety**: TypeScript + Effect + @effect/schema - End-to-end type safety
+with generated types from backend and runtime validation
+
+**Error Handling**: Effect - Type-safe error handling with explicit error types
 
 **Charting**: TradingView Lightweight Charts - Professional financial charting
 library
@@ -76,6 +82,9 @@ library
 ## API Design
 
 ### REST API Endpoints
+
+All APIs use **Servant NamedRoutes** pattern for type-safe, explicit handler
+naming.
 
 #### Version 1 (MVP)
 
@@ -92,6 +101,32 @@ Response: { price, greeks: { delta, gamma, vega, theta, rho } }
 ```
 GET /api/v1/health
 Response: { status, version }
+```
+
+**NamedRoutes Example**:
+
+```haskell
+data API mode = API
+  { health
+      :: mode
+        :- "health"
+          :> Get '[JSON] HealthResponse
+
+  , blackScholes
+      :: mode
+        :- "price"
+          :> "black-scholes"
+          :> ReqBody '[JSON] BSInput
+          :> Post '[JSON] BSOutput
+  }
+  deriving stock (Generic)
+
+server :: API AsServer
+server =
+  API
+    { health = healthHandler
+    , blackScholes = bsHandler
+    }
 ```
 
 #### Future Endpoints (Planned)
@@ -160,7 +195,9 @@ Organized by feature in `frontend/src/`:
 - `lib/components/calculator/` - Option pricing form and results
 - `lib/components/charts/` - Payoff diagrams, Greeks charts, volatility surface
 - `lib/components/layout/` - Header, sidebar, navigation
-- `lib/api/` - API client with generated TypeScript types
+- `lib/services/` - Effect services for API clients, config, market data, etc.
+- `lib/schemas/` - Effect Schema definitions for data validation
+- `lib/api/` - API client service implementation (Effect-based)
 - `lib/stores/` - Svelte stores for state management
 - `routes/` - SvelteKit file-based routes
 
@@ -175,13 +212,61 @@ Organized by feature in `frontend/src/`:
 State is managed locally in components with Svelte runes. Shared state uses
 Svelte stores when needed across routes.
 
+**Effect Integration**:
+
+- Execute Effect programs with `Effect.runPromise` in components
+- Integrate Effect async operations with Svelte runes
+- Use Effect services for dependency injection
+- Handle errors with `Effect.catchAll` and update Svelte state accordingly
+
 ### Type Safety Strategy
 
 1. Define Servant API types in Haskell
-2. Generate TypeScript types using `servant-typescript` or similar
-3. Frontend imports generated types for API requests/responses
-4. Compile-time verification of API contracts
-5. Runtime validation of API responses
+2. Generate Effect Schemas from backend types (or manually define)
+3. Use `Schema.decode` for runtime validation of all API responses
+4. Frontend imports generated schemas and types
+5. Compile-time verification of API contracts via TypeScript
+6. Runtime validation via Effect Schema ensures type safety at boundaries
+7. Use Schema refinements for business rules (positive numbers, valid ranges)
+8. Define explicit error types for all failure modes
+
+**Example Schema Definition**:
+
+```typescript
+import { Schema } from "@effect/schema";
+
+export const OptionPriceSchema = Schema.Struct({
+  price: Schema.Number.pipe(Schema.positive()),
+  greeks: Schema.Struct({
+    delta: Schema.Number,
+    gamma: Schema.Number.pipe(Schema.positive()),
+    vega: Schema.Number.pipe(Schema.positive()),
+    theta: Schema.Number,
+    rho: Schema.Number,
+  }),
+});
+
+export type OptionPrice = Schema.Schema.Type<typeof OptionPriceSchema>;
+
+// Decode API response with validation
+const decodePrice = Schema.decodeUnknown(OptionPriceSchema);
+const priceEffect = decodePrice(apiResponse); // Effect<OptionPrice, ParseError>
+```
+
+**Error Type Definition**:
+
+```typescript
+import { Data } from "effect";
+
+export class ApiError extends Data.TaggedError("ApiError")<{
+  readonly status: number;
+  readonly message: string;
+}> {}
+
+export class ValidationError extends Data.TaggedError("ValidationError")<{
+  readonly issues: ReadonlyArray<Schema.ParseIssue>;
+}> {}
+```
 
 ## Development Workflow
 
@@ -199,10 +284,13 @@ Package by feature, not by layer. Each feature module contains all related code.
 ### Frontend Development
 
 1. Design component UI (Figma or directly in Svelte)
-2. Implement with Svelte + shadcn components
-3. Connect to API using generated types
-4. Add tests (component tests, integration tests)
-5. Format with prettier and lint with eslint
+2. Define Effect Schemas for data structures
+3. Implement Effect services for external dependencies
+4. Implement with Svelte + shadcn components
+5. Connect to API using Effect-based API client
+6. Add error handling with Effect error types
+7. Add tests (component tests, integration tests, service tests)
+8. Format with prettier and lint with eslint
 
 ### Full-Stack Feature Example
 
@@ -210,9 +298,11 @@ Adding binomial tree pricing:
 
 1. Backend: Create `src/Binomial/` module containing types, pricing logic, API
    endpoints, and tests
-2. Type generation: Regenerate TypeScript types from Haskell API
-3. Frontend: Create calculator component, add route, connect to API
-4. Testing: End-to-end tests with real API calls
+2. Schema generation: Define Effect Schemas for binomial pricing types
+3. Frontend: Create Effect service for binomial API, define error types
+4. Frontend: Create calculator component with Schema validation
+5. Frontend: Integrate Effect service in component with error handling
+6. Testing: End-to-end tests with real API calls and Effect test utilities
 
 ## Testing Strategy
 
@@ -222,11 +312,14 @@ Adding binomial tree pricing:
 - **Property Tests**: QuickCheck for invariants (e.g., call-put parity)
 - **API Tests**: Test Servant endpoints with servant-client
 
-### Frontend (Vitest + Testing Library)
+### Frontend (Vitest + Testing Library + Effect Test)
 
 - **Component Tests**: Test UI components in isolation
 - **Integration Tests**: Test complete user flows
-- **API Client Tests**: Mock API responses for testing
+- **Service Tests**: Test Effect services with `Layer.succeed` for mocking
+- **Schema Tests**: Test validation with valid/invalid inputs
+- **Error Handling Tests**: Test error scenarios with `Effect.fail`
+- **API Client Tests**: Mock API responses using test layers
 
 ## Deployment
 

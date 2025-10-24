@@ -1,0 +1,22 @@
+# HLint configuration for Quanty
+# Matches language settings from package.yaml
+
+# Use GHC2024 as the base language
+- arguments:
+    - --language=GHC2024
+    - --extension=ApplicativeDo
+    - --extension=BlockArguments
+    - --extension=DeriveAnyClass
+    - --extension=DerivingVia
+    - --extension=NoImplicitPrelude
+    - --extension=OverloadedStrings
+    - --extension=QuasiQuotes
+    - --extension=RecordWildCards
+    - --extension=TypeFamilyDependencies
+    - --extension=ViewPatterns
+    - --extension=DuplicateRecordFields
+    - --extension=NoFieldSelectors
+    - --extension=OverloadedRecordDot
+
+# Ignore parse errors in files with QuasiQuotes (known hlint limitation)
+- ignore: { name: Parse error }
