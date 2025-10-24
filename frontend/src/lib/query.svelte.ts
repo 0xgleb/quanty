@@ -18,22 +18,48 @@ type QueryResult<TData, TError> = {
 /**
  * Create a query that automatically fetches on mount and provides reactive state.
  * Similar to TanStack Query but built for Svelte 5 runes + Effect.
+ *
+ * Automatically cancels in-flight requests when component unmounts.
  */
 export const createQuery = <TData, TError>(
   effect: Effect.Effect<TData, TError, never>,
 ): QueryResult<TData, TError> => {
   let state = $state<QueryState<TData, TError>>({ status: "pending" })
+  let abortController: AbortController | null = null
 
   const fetch = () => {
+    // Cancel previous request if still running
+    if (abortController) {
+      abortController.abort()
+    }
+
+    abortController = new AbortController()
+    const signal = abortController.signal
+
     state = { status: "pending" }
     Effect.runPromise(effect)
-      .then(data => (state = { status: "success", data }))
-      .catch(error => (state = { status: "error", error }))
+      .then(data => {
+        if (!signal.aborted) {
+          state = { status: "success", data }
+        }
+      })
+      .catch(error => {
+        if (!signal.aborted) {
+          state = { status: "error", error }
+        }
+      })
   }
 
-  // Auto-fetch on mount
+  // Auto-fetch on mount, cancel on unmount
   $effect(() => {
     untrack(fetch)
+
+    return () => {
+      // Cleanup: cancel in-flight request when component unmounts
+      if (abortController) {
+        abortController.abort()
+      }
+    }
   })
 
   return {
@@ -76,22 +102,50 @@ type MutationResult<TData, TError> = {
 /**
  * Create a mutation for manual triggering (e.g., button clicks).
  * Similar to TanStack Query mutations but built for Svelte 5 runes + Effect.
+ *
+ * Automatically cancels in-flight requests when component unmounts.
  */
 export const createMutation = <TData, TError>(
   effect: Effect.Effect<TData, TError, never>,
 ): MutationResult<TData, TError> => {
   let state = $state<MutationState<TData, TError>>({ status: "idle" })
+  let abortController: AbortController | null = null
 
   const mutate = () => {
+    // Cancel previous request if still running
+    if (abortController) {
+      abortController.abort()
+    }
+
+    abortController = new AbortController()
+    const signal = abortController.signal
+
     state = { status: "pending" }
     Effect.runPromise(effect)
-      .then(data => (state = { status: "success", data }))
-      .catch(error => (state = { status: "error", error }))
+      .then(data => {
+        if (!signal.aborted) {
+          state = { status: "success", data }
+        }
+      })
+      .catch(error => {
+        if (!signal.aborted) {
+          state = { status: "error", error }
+        }
+      })
   }
 
   const reset = () => {
     state = { status: "idle" }
   }
+
+  // Cancel in-flight request when component unmounts
+  $effect(() => {
+    return () => {
+      if (abortController) {
+        abortController.abort()
+      }
+    }
+  })
 
   return {
     get data() {

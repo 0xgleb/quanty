@@ -196,6 +196,8 @@ Complete market data feature in a single module containing:
 - [ ] Show data staleness warnings
 - [ ] Cache market data with Effect
 - [ ] Handle offline scenarios with Effect fallbacks
+- [ ] [#10](https://github.com/0xgleb/quanty/issues/10) - Add query refetch on
+      window focus/network reconnect
 
 ---
 
