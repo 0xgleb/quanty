@@ -49,16 +49,16 @@ Minimal viable backend with Black-Scholes pricing endpoint.
 
 ### Deliverables
 
-- REST API server with health check
-- Black-Scholes pricing endpoint (complete feature)
-- JSON serialization with Aeson
-- Comprehensive test suite
+- [x] REST API server with health check
+- [x] Black-Scholes pricing endpoint (complete feature)
+- [x] JSON serialization with Aeson
+- [x] Comprehensive test suite
 
 ### Tasks
 
-- [ ] [#6](https://github.com/0xgleb/quanty/issues/6) - Implement Black-Scholes
+- [x] [#6](https://github.com/0xgleb/quanty/issues/6) - Implement Black-Scholes
       pricing in `src/BlackScholes/`
-- [ ] [#7](https://github.com/0xgleb/quanty/issues/7) - Create basic Servant
+- [x] [#7](https://github.com/0xgleb/quanty/issues/7) - Create basic Servant
       server
 
 ---
@@ -69,33 +69,34 @@ Minimal viable frontend with option pricing calculator.
 
 ### Deliverables
 
-- Home page with project description
-- Black-Scholes calculator page
-- Parameter input form with validation
-- Results display with price and Greeks
-- Responsive design
-- End-to-end tests
+- [x] Black-Scholes calculator page
+- [x] Parameter input form with validation
+- [x] Results display with price and Greeks
+- [x] Responsive design
+- [x] Comprehensive test suite (50 tests)
 
 ### Tasks
 
 **Effect Services Infrastructure**:
 
-- [ ] Define ApiClient service using Context.Tag
-- [ ] Implement HTTP client with @effect/platform/HttpClient
-- [ ] Create Effect Schemas for API request/response types
-- [ ] Define error types: NetworkError, ApiError, ValidationError
-- [ ] Add timeout and retry logic to API calls
-- [ ] Create ApiClientLive Layer for dependency injection
+- [x] Define BlackScholesService using Context.Tag
+- [x] Create Effect Schemas for API request/response types
+- [x] Define error types: NetworkError, ApiError, ValidationError
+- [x] Add timeout logic to API calls
+- [x] Create BlackScholesServiceLive Layer for dependency injection
 
 **Calculator UI with Effect Integration**:
 
-- [ ] [#8](https://github.com/0xgleb/quanty/issues/8) - Build basic calculator
+- [x] [#8](https://github.com/0xgleb/quanty/issues/8) - Build basic calculator
       UI
-- [ ] Integrate Effect API client in Svelte components
-- [ ] Add Schema validation for user inputs
-- [ ] Handle errors with Effect.catchAll and Effect.catchTag
-- [ ] Display validation errors from Schema
-- [ ] Add loading/error states for async operations
+- [x] Integrate Effect API client in Svelte components
+- [x] Add Schema validation for user inputs
+- [x] Handle errors with Effect.catchAll and Effect.catchTag
+- [x] Display validation errors from Schema
+- [x] Add loading/error states for async operations
+- [x] Add preset buttons (ATM Call, OTM Call, ITM Put)
+- [x] Add error handling with user-friendly messages
+- [x] Add educational tooltips and help text
 
 ---
 
@@ -458,6 +459,95 @@ Prepare for production deployment with monitoring, logging, and documentation.
 - [ ] Check CORS configuration
 - [ ] Review dependency vulnerabilities
 - [ ] Add security headers
+
+---
+
+## Experimental: Serverless Architecture with WASM
+
+**Status:** Research phase
+
+Explore migrating to a serverless architecture using GHC's WebAssembly backend
+to eliminate backend hosting requirements.
+
+### Goal
+
+Replace Servant API backend with Haskell compiled to WebAssembly, enabling:
+
+- Serverless deployment to Vercel/Netlify/Cloudflare Pages
+- Offline-first functionality (PWA-ready)
+- Zero network latency for calculations
+- No backend hosting costs
+
+### Architecture
+
+**Current:** TypeScript Frontend ↔ HTTP/JSON ↔ Haskell Backend API
+
+**Proposed:** TypeScript Frontend → JavaScript calls → Haskell WASM Module
+
+Hybrid approach: Svelte/TypeScript for UI/UX, Haskell WASM for numerical
+computation.
+
+### Tasks
+
+- [ ] [#12](https://github.com/0xgleb/quanty/issues/12) - Research and document
+      WASM feasibility
+
+**Phase 1: Proof of Concept**
+
+- [ ] Set up Nix flake with ghc-wasm-meta
+- [ ] Create minimal Haskell module with exported function
+- [ ] Compile to WASM and generate FFI glue code
+- [ ] Load WASM in browser with WASI shim
+- [ ] Call from TypeScript successfully
+- [ ] Measure bundle size and performance
+
+**Phase 2: Type Generation** (if PoC successful)
+
+- [ ] Set up aeson-typescript for data types
+- [ ] Generate TypeScript definitions for BlackScholesInput, OptionPrice
+- [ ] Write declarations for exported functions
+- [ ] Integrate into build process
+
+**Phase 3: Feature Parity** (if types work well)
+
+- [ ] Port Black-Scholes module to WASM export
+- [ ] Replace HTTP API calls with WASM calls in Effect services
+- [ ] Verify identical calculation results
+- [ ] Update tests for WASM integration
+
+**Phase 4: Production Ready** (if all looks good)
+
+- [ ] Optimize bundle size with wasm-opt
+- [ ] Add comprehensive error handling
+- [ ] Deploy to Vercel as static site
+- [ ] Document new architecture
+- [ ] Update README and SPEC
+
+### Success Criteria
+
+- Bundle size < 3MB total
+- Initial page load < 2s on 3G
+- Type-safe TypeScript→Haskell calls
+- Calculations match current API exactly
+- No backend deployment needed
+- Offline functionality works
+
+### Decision Points
+
+**After Phase 1 (PoC):**
+
+- Go if: WASM loads, calls work, bundle size acceptable
+- No-go if: Integration too complex or bundle > 5MB
+
+**After Phase 2 (Types):**
+
+- Go if: TypeScript bindings ergonomic
+- No-go if: Type generation too painful
+
+**After Phase 3 (Parity):**
+
+- Go if: Performance acceptable, results match
+- No-go if: Performance worse than API
 
 ---
 

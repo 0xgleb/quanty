@@ -12,57 +12,54 @@ industry-standard models. Start with simple manual parameter input and basic
 Black-Scholes pricing, then expand to support multiple pricing models, exotic
 options, real-time market data, and advanced analytics.
 
-### Key Features
+- **[SPEC.md](SPEC.md)** - Technical specification and architecture
+- **[ROADMAP.md](ROADMAP.md)** - Development roadmap
+- **[AGENTS.md](AGENTS.md)** - AI development assistant instructions
 
-- **Options Pricing**: Black-Scholes model with support for crypto-specific
-  adjustments
-- **Interactive UI**: Modern web interface built with Svelte 5 and shadcn
-  components
-- **Type-Safe Error Handling**: Effect-based architecture for robust error
-  handling and async operations
-- **Real-Time Calculations**: Fast Haskell backend with Servant API
-- **Runtime Validation**: Effect Schema for type-safe data validation
-- **Multiple Instruments**: Support for various option types and derivatives
-  (planned)
-- **Market Data Integration**: Real-time and historical crypto price feeds
-  (planned)
-- **Visualization**: Interactive charts and Greeks analysis (planned)
+See [SPEC.md](SPEC.md) for architecture details and [ROADMAP.md](ROADMAP.md) for
+the development plan.
 
-## Tech Stack
+## Features
 
-### Backend
+### Black-Scholes Calculator
 
-- **Haskell**: Core computation engine and API server
-- **Servant**: Type-safe REST API framework
-- **Protolude**: Modern Prelude replacement
+Price European options using the classic Black-Scholes model:
 
-### Frontend
+- **Interactive calculator** with real-time results
+- **Full Greeks calculation** (Delta, Gamma, Vega, Theta, Rho)
+- **Quick presets** for common scenarios (ATM Call, OTM Call, ITM Put)
+- **Input validation** with helpful error messages
+- **Educational tooltips** explaining each parameter and Greek
+- **Responsive design** works on desktop and mobile
 
-- **SvelteKit**: Full-stack framework with SSR support
-- **Svelte 5**: Reactive UI framework with runes
-- **TypeScript**: Type-safe frontend development
-- **Effect**: Type-safe error handling and async operations
-- **@effect/schema**: Runtime validation and type generation
-- **shadcn/ui**: Component library for consistent design
-- **TailwindCSS**: Utility-first styling
+**API Endpoint**: `POST /black-scholes`
 
-### Infrastructure
-
-- **Nix**: Reproducible development environment and dependency management
-- **Stack**: Haskell build tool configured to use Nix GHC
+```bash
+curl -X POST http://localhost:8080/black-scholes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "spot": 111000,
+    "strike": 115000,
+    "timeToExpiry": { "days": 30 },
+    "volatility": 0.45,
+    "riskFreeRate": 0.039,
+    "kind": "Call"
+  }'
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Nix](https://nixos.org/download.html) with flakes enabled
+- [Nix](https://github.com/DeterminateSystems/nix-installer) DeterminateSystems
+  Nix (recommended)
 
 ### Development Setup
 
 1. **Clone the repository**:
 
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:0xgleb/quanty.git
    cd quanty
    ```
 
@@ -77,7 +74,7 @@ options, real-time market data, and advanced analytics.
 3. **Install dependencies**:
 
    ```bash
-   stack build              # Backend dependencies
+   stack build --fast            # Backend dependencies
    cd frontend && pnpm install   # Frontend dependencies
    ```
 
@@ -99,9 +96,9 @@ options, real-time market data, and advanced analytics.
 ### Backend (Haskell)
 
 ```bash
-stack build              # Build the project
-stack test               # Run tests
-stack run                # Start API server
+stack build --fast       # Build the project
+stack test --fast        # Run tests
+stack exec quanty-exe    # Start API server (after building)
 
 fourmolu --mode inplace <file>.hs  # Format code
 hlint <file>.hs          # Lint code
@@ -200,12 +197,3 @@ Hooks run automatically on `git commit`. To bypass (not recommended):
 ```bash
 git commit --no-verify
 ```
-
-## Documentation
-
-- **[SPEC.md](SPEC.md)** - Technical specification and architecture
-- **[ROADMAP.md](ROADMAP.md)** - Development roadmap
-- **[CLAUDE.md](CLAUDE.md)** - AI development assistant instructions
-
-See [SPEC.md](SPEC.md) for architecture details and [ROADMAP.md](ROADMAP.md) for
-the development plan.
