@@ -19,6 +19,34 @@ options, real-time market data, and advanced analytics.
 See [SPEC.md](SPEC.md) for architecture details and [ROADMAP.md](ROADMAP.md) for
 the development plan.
 
+## Features
+
+### Black-Scholes Calculator
+
+Price European options using the classic Black-Scholes model:
+
+- **Interactive calculator** with real-time results
+- **Full Greeks calculation** (Delta, Gamma, Vega, Theta, Rho)
+- **Quick presets** for common scenarios (ATM Call, OTM Call, ITM Put)
+- **Input validation** with helpful error messages
+- **Educational tooltips** explaining each parameter and Greek
+- **Responsive design** works on desktop and mobile
+
+**API Endpoint**: `POST /black-scholes`
+
+```bash
+curl -X POST http://localhost:8080/black-scholes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "spot": 111000,
+    "strike": 115000,
+    "timeToExpiry": { "days": 30 },
+    "volatility": 0.45,
+    "riskFreeRate": 0.039,
+    "kind": "Call"
+  }'
+```
+
 ## Getting Started
 
 ### Prerequisites

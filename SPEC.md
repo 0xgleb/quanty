@@ -81,61 +81,21 @@ library
 
 ## API Design
 
-### REST API Endpoints
+### REST API
 
 All APIs use **Servant NamedRoutes** pattern for type-safe, explicit handler
-naming.
+naming. The API specification is defined in Haskell and automatically generates:
 
-#### Version 1 (MVP)
+- OpenAPI 3.0 specification (`openapi.json`)
+- TypeScript client types and SDK (via openapi-ts)
 
-**Black-Scholes Pricing**:
+**Implemented Features:**
 
-```
-POST /api/v1/price/black-scholes
-Request: { optionType, spot, strike, timeToExpiry, riskFreeRate, volatility }
-Response: { price, greeks: { delta, gamma, vega, theta, rho } }
-```
+- Black-Scholes European option pricing with Greeks
+- Health check endpoint
 
-**Health Check**:
-
-```
-GET /api/v1/health
-Response: { status, version }
-```
-
-**NamedRoutes Example**:
-
-```haskell
-data API mode = API
-  { health
-      :: mode
-        :- "health"
-          :> Get '[JSON] HealthResponse
-
-  , blackScholes
-      :: mode
-        :- "price"
-          :> "black-scholes"
-          :> ReqBody '[JSON] BSInput
-          :> Post '[JSON] BSOutput
-  }
-  deriving stock (Generic)
-
-server :: API AsServer
-server =
-  API
-    { health = healthHandler
-    , blackScholes = bsHandler
-    }
-```
-
-#### Future Endpoints (Planned)
-
-- `POST /api/v1/price/binomial` - Binomial tree pricing
-- `POST /api/v1/price/monte-carlo` - Monte Carlo simulation
-- `GET /api/v1/market/price/:symbol` - Real-time market data
-- `GET /api/v1/market/volatility/:symbol` - Implied volatility surface
-- `POST /api/v1/portfolio/analyze` - Portfolio Greeks and risk
+**Documentation:** OpenAPI spec available at `/openapi.json` when running the
+server. Future: Swagger UI for interactive API documentation.
 
 ### Core Data Types
 
