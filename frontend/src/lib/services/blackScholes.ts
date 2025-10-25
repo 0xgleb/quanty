@@ -20,6 +20,43 @@ export class ApiError extends Data.TaggedError("ApiError")<{
 
 export type BlackScholesError = NetworkError | ValidationError | ApiError
 
+export const getErrorMessage = (
+  error: BlackScholesError | Error | null | undefined,
+): {
+  title: string
+  message: string
+} => {
+  if (!error) return { title: "Error", message: "An unknown error occurred" }
+
+  if (!("_tag" in error))
+    return {
+      title: "Calculation Error",
+      message: error.message || "Failed to calculate option price",
+    }
+
+  switch (error._tag) {
+    case "NetworkError":
+      return {
+        title: "Connection Error",
+        message:
+          "Unable to connect to the server. Please check your internet connection and try again.",
+      }
+    case "ValidationError":
+      return {
+        title: "Validation Error",
+        message: error.message || "Invalid input provided",
+      }
+    case "ApiError":
+      return {
+        title: "Server Error",
+        message:
+          error.status >= 500
+            ? "The server encountered an error. Please try again later."
+            : error.message || "Invalid request",
+      }
+  }
+}
+
 // Schema for Black-Scholes inputs with validation
 export const InputsSchema = Schema.Struct({
   spot: Schema.Number.pipe(

@@ -4,12 +4,16 @@
   import { Input } from "$lib/components/ui/input"
   import { Label } from "$lib/components/ui/label"
   import { createMutation } from "$lib/query.svelte"
-  import { BlackScholesService } from "$lib/services/blackScholes"
+  import {
+    BlackScholesService,
+    BlackScholesServiceLive,
+    getErrorMessage,
+  } from "$lib/services/blackScholes"
   import { Effect } from "effect"
-  import { BlackScholesServiceLive } from "$lib/services/blackScholes"
   import type { Inputs, OptionKind } from "$lib/api/generated/types.gen"
   import katex from "katex"
   import { formatNumber } from "$lib/formatNumber"
+  import { presets, type Preset } from "$lib/presets"
 
   let callFormulaElement: HTMLDivElement | undefined = $state()
   let dPlusFormulaElement: HTMLDivElement | undefined = $state()
@@ -59,15 +63,24 @@
 
       const service = yield* BlackScholesService
       return yield* service.calculatePrice(inputs)
-    }).pipe(Effect.provide(BlackScholesServiceLive)),
+    }).pipe(
+      Effect.provide(BlackScholesServiceLive),
+      Effect.catchAll((error) =>
+        Effect.fail(
+          error instanceof Error
+            ? error
+            : new Error("Unexpected error occurred"),
+        ),
+      ),
+    ),
   )
 
-  function handleSubmit(event: Event) {
+  const handleSubmit = (event: Event) => {
     event.preventDefault()
     calculateMutation.mutate(undefined)
   }
 
-  function handleReset() {
+  const handleReset = () => {
     formData = {
       spot: undefined,
       strike: undefined,
@@ -77,6 +90,18 @@
     }
     optionKind = "Call"
     calculateMutation.reset()
+  }
+
+  const loadPreset = (preset: Preset) => {
+    formData = {
+      spot: preset.values.spot,
+      strike: preset.values.strike,
+      timeToExpiry: { days: preset.values.timeToExpiry.days },
+      volatility: preset.values.volatility,
+      riskFreeRate: preset.values.riskFreeRate,
+    }
+    optionKind = preset.values.kind
+    calculateMutation.mutate(undefined)
   }
 
   $effect(() => {
@@ -92,18 +117,14 @@
     }
 
     try {
-      if (callFormulaElement) {
+      if (callFormulaElement)
         katex.render(callFormula, callFormulaElement, renderOptions)
-      }
-      if (dPlusFormulaElement) {
+      if (dPlusFormulaElement)
         katex.render(dPlusFormula, dPlusFormulaElement, renderOptions)
-      }
-      if (dMinusFormulaElement) {
+      if (dMinusFormulaElement)
         katex.render(dMinusFormula, dMinusFormulaElement, renderOptions)
-      }
-      if (putFormulaElement) {
+      if (putFormulaElement)
         katex.render(putFormula, putFormulaElement, renderOptions)
-      }
     } catch (error) {
       console.error("KaTeX rendering error:", error)
     }
@@ -140,6 +161,27 @@
           </Card.Description>
         </Card.Header>
         <Card.Content>
+          <div class="mb-5 pb-5 border-b">
+            <div class="text-sm font-medium mb-3">Quick Presets</div>
+            <div class="flex flex-wrap gap-2">
+              {#each presets as preset}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onclick={() => loadPreset(preset)}
+                  disabled={calculateMutation.isPending}
+                  class="h-auto px-4 py-3 text-xs"
+                >
+                  <div class="flex flex-col items-start gap-0.5">
+                    <span class="font-medium">{preset.name}</span>
+                    <span class="text-muted-foreground font-normal">
+                      {preset.description}
+                    </span>
+                  </div>
+                </Button>
+              {/each}
+            </div>
+          </div>
           <form onsubmit={handleSubmit} class="space-y-5">
             <div class="space-y-1.5">
               <Label>Option Type</Label>
@@ -287,13 +329,12 @@
             </div>
 
             {#if calculateMutation.isError}
+              {@const errorDetails = getErrorMessage(calculateMutation.error)}
               <div
                 class="p-4 rounded-lg bg-destructive/10 text-destructive text-sm"
               >
-                <div class="font-medium mb-1">Calculation Error</div>
-                <div>
-                  {calculateMutation.error?.message ?? "Failed to calculate option price"}
-                </div>
+                <div class="font-medium mb-1">{errorDetails.title}</div>
+                <div>{errorDetails.message}</div>
               </div>
             {/if}
           </form>

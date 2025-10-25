@@ -169,57 +169,26 @@ Display pricing results and Greeks.
 secondary details. Educational tooltips help users understand the outputs.
 Conditional rendering prevents showing stale data.
 
-## Task 7. Backend - Structured Logging
-
-Add structured logging to backend with OpenTelemetry compatibility.
-
-- [ ] Add `katip` library to `package.yaml` dependencies
-- [ ] Create logging configuration in `src/Logging.hs`:
-  - Define log severity levels (Debug, Info, Warning, Error)
-  - Set up console scribes for development
-  - Make OTEL-compatible (JSON-structured logs with trace context)
-- [ ] Update `src/Main.hs` to initialize logging on startup
-- [ ] Add logging to API handlers in `src/Api.hs`:
-  - Log incoming requests (endpoint, method)
-  - Log request validation failures
-  - Log successful responses
-  - Log errors with full context
-- [ ] Add logging to `src/BlackScholes.hs`:
-  - Log calculation inputs (sanitized)
-  - Log calculation results
-  - Log any numerical edge cases
-- [ ] Create `KatipContext` constraint for handlers
-- [ ] Add correlation IDs for request tracing
-- [ ] Verify logs appear in console with proper structure
-- [ ] Run `stack build --fast` and `stack test --fast` to verify
-- [ ] Run `fourmolu` to format code
-
-**Reasoning**: Structured logging with katip provides JSON-formatted logs that
-can be easily parsed and analyzed. Katip's namespace and context features map
-well to OpenTelemetry's span/trace model, making future OTEL integration
-straightforward. Using katip now gives us production-ready logging with minimal
-overhead while keeping the door open for advanced telemetry later.
-
-## Task 8. Frontend - Error Handling & Polish
+## Task 7. Frontend - Error Handling & Polish
 
 Add comprehensive error handling and UX improvements.
 
-- [ ] Handle network errors with user-friendly messages
-- [ ] Handle validation errors by showing field-specific errors
-- [ ] Handle API errors (500, etc.) with generic error message
-- [ ] Add error boundary with `Effect.catchAll`
-- [ ] Add reset button to clear form and results
-- [ ] Add example preset buttons (e.g., "ATM Call", "ITM Put")
-- [ ] Ensure responsive design works on mobile
-- [ ] Add page title and meta description
-- [ ] Run `pnpm format` and `pnpm lint`
-- [ ] Run `pnpm check` (TypeScript type check)
+- [x] Handle network errors with user-friendly messages
+- [x] Handle validation errors by showing field-specific errors
+- [x] Handle API errors (500, etc.) with generic error message
+- [x] Add error boundary with `Effect.catchAll`
+- [x] Add reset button to clear form and results
+- [x] Add example preset buttons (e.g., "ATM Call", "ITM Put")
+- [x] Ensure responsive design works on mobile
+- [x] Add page title and meta description
+- [x] Run `pnpm format` and `pnpm lint`
+- [x] Run `pnpm check` (TypeScript type check)
 
 **Reasoning**: Graceful error handling improves UX. Preset buttons help users
 get started quickly. Responsive design ensures usability on all devices.
 Linting/formatting maintains code quality.
 
-## Task 9. Testing
+## Task 8. Testing
 
 Add tests for frontend calculator.
 
@@ -235,7 +204,7 @@ Add tests for frontend calculator.
 **Reasoning**: Tests ensure calculator works correctly and handles errors
 gracefully. Mocking Effect services allows testing without backend dependency.
 
-## Task 10. Documentation Updates
+## Task 9. Documentation Updates
 
 Update project documentation to reflect new feature.
 
