@@ -83,6 +83,7 @@ default-extensions:
   - BlockArguments
   - DeriveAnyClass
   - DerivingVia
+  - LinearTypes
   - NoImplicitPrelude
   - OverloadedStrings
   - QuasiQuotes

@@ -17,9 +17,7 @@
 -- For cryptocurrency markets, note that we use 365 days/year due to 24/7 trading.
 module BlackScholes (
   -- * Core Types
-  OptionKind (..),
-  TimeToExpiryDays (..),
-  BlackScholesInput (..),
+  Inputs (..),
   Greeks (..),
   OptionPrice (..),
 
@@ -30,53 +28,23 @@ module BlackScholes (
   calculateD2,
   calculateCallPrice,
   calculatePutPrice,
+
+  -- * Re-exports from Option
+  module Option,
 ) where
 
 import Data.Aeson qualified as Aeson
 import Data.Number.Erf (erf)
 import Data.OpenApi (ToSchema)
+import Option
 import Protolude
-
-
--- | Type of option contract.
---
--- 'Call' gives the right to buy the underlying at the strike price.
--- 'Put' gives the right to sell the underlying at the strike price.
-data OptionKind
-  = Call
-  | Put
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (Aeson.ToJSON, Aeson.FromJSON, ToSchema)
-
-
--- | Time to expiration expressed in days.
---
--- This newtype makes the units explicit and is natural for cryptocurrency
--- options which typically expire in days or weeks rather than years.
---
--- ==== __Examples__
--- @
--- TimeToExpiryDays 1    -- 1 day
--- TimeToExpiryDays 7    -- 1 week
--- TimeToExpiryDays 30   -- 30 days
--- TimeToExpiryDays 90   -- ~3 months
--- @
---
--- Internally converted to years for the Black-Scholes formula using
--- 365 days/year (crypto markets trade 24/7).
-newtype TimeToExpiryDays = TimeToExpiryDays
-  { days :: Double
-  -- ^ Time in days. Must be > 0.
-  }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (Aeson.ToJSON, Aeson.FromJSON, ToSchema)
 
 
 -- | Input parameters for Black-Scholes pricing.
 --
 -- All parameters must be positive and finite. Violations will result in
 -- incorrect pricing (NaN or Infinity).
-data BlackScholesInput = BlackScholesInput
+data Inputs = Inputs
   { spot :: Double
   -- ^ Current price of the underlying asset (S). Must be > 0.
   , strike :: Double
@@ -151,7 +119,7 @@ data OptionPrice = OptionPrice
 --
 -- ==== __Example__
 -- @
--- let input = BlackScholesInput
+-- let input = Inputs
 --       { spot = 100.0
 --       , strike = 105.0
 --       , timeToExpiry = TimeToExpiryDays 30  -- 30 days
@@ -170,7 +138,7 @@ data OptionPrice = OptionPrice
 -- * All values must be finite (not NaN or Infinity)
 --
 -- Violating these preconditions will result in NaN or Infinity in the output.
-calculatePrice :: BlackScholesInput -> Double
+calculatePrice :: Inputs -> Double
 calculatePrice input =
   let d1Value = calculateD1 input
       d2Value = calculateD2 input d1Value
@@ -187,7 +155,7 @@ calculatePrice input =
 --
 -- ==== __Example__
 -- @
--- let input = BlackScholesInput
+-- let input = Inputs
 --       { spot = 100.0
 --       , strike = 105.0
 --       , timeToExpiry = TimeToExpiryDays 30  -- 30 days
@@ -206,7 +174,7 @@ calculatePrice input =
 -- * All values must be finite (not NaN or Infinity)
 --
 -- Violating these preconditions will result in NaN or Infinity in the output.
-calculatePriceWithGreeks :: BlackScholesInput -> OptionPrice
+calculatePriceWithGreeks :: Inputs -> OptionPrice
 calculatePriceWithGreeks input = OptionPrice {..}
   where
     d1Value = calculateD1 input
@@ -244,9 +212,9 @@ calculatePriceWithGreeks input = OptionPrice {..}
 -- 2. (r + sigma^2/2) * T: The expected drift adjusted for volatility
 --
 -- The denominator (sigma * sqrt(T)) normalizes by volatility over time.
-calculateD1 :: BlackScholesInput -> Double
+calculateD1 :: Inputs -> Double
 calculateD1 input =
-  let tYears = input.timeToExpiry.days / 365.0 -- Convert days to years
+  let tYears = getTimeToExpiryDays input.timeToExpiry / 365.0 -- Convert days to years
    in ( log (input.spot / input.strike)
           + (input.riskFreeRate + 0.5 * input.volatility ** 2) * tYears
       )
@@ -272,9 +240,9 @@ calculateD1 input =
 --
 -- The difference between d1 and d2 (sigma * sqrt(T)) represents one standard
 -- deviation of the log-returns over the remaining time to expiration.
-calculateD2 :: BlackScholesInput -> Double -> Double
+calculateD2 :: Inputs -> Double -> Double
 calculateD2 input d1Value =
-  let tYears = input.timeToExpiry.days / 365.0
+  let tYears = getTimeToExpiryDays input.timeToExpiry / 365.0
    in d1Value - input.volatility * sqrt tYears
 
 
@@ -298,9 +266,9 @@ calculateD2 input d1Value =
 --
 -- This represents the expected value of the call payoff under risk-neutral
 -- pricing, discounted to present value.
-calculateCallPrice :: BlackScholesInput -> Double -> Double -> Double
+calculateCallPrice :: Inputs -> Double -> Double -> Double
 calculateCallPrice input d1Value d2Value =
-  let tYears = input.timeToExpiry.days / 365.0
+  let tYears = getTimeToExpiryDays input.timeToExpiry / 365.0
       discountFactor = exp (-(input.riskFreeRate * tYears))
    in input.spot * standardNormalCdf d1Value
         - input.strike * discountFactor * standardNormalCdf d2Value
@@ -327,9 +295,9 @@ calculateCallPrice input d1Value d2Value =
 --
 -- This represents the expected value of the put payoff under risk-neutral
 -- pricing, discounted to present value.
-calculatePutPrice :: BlackScholesInput -> Double -> Double -> Double
+calculatePutPrice :: Inputs -> Double -> Double -> Double
 calculatePutPrice input d1Value d2Value =
-  let tYears = input.timeToExpiry.days / 365.0
+  let tYears = getTimeToExpiryDays input.timeToExpiry / 365.0
       discountFactor = exp (-(input.riskFreeRate * tYears))
    in input.strike * discountFactor * standardNormalCdf (-d2Value)
         - input.spot * standardNormalCdf (-d1Value)
@@ -364,12 +332,12 @@ standardNormalCdf x = 0.5 * (1.0 + erf (x / sqrt 2.0))
 -- - Vega: Change per 1% point of volatility (e.g., 20% -> 21%)
 -- - Theta: Change per calendar day (annual rate / 365)
 -- - Rho: Change per 1% point of interest rate (e.g., 5% -> 6%)
-calculateGreeks :: BlackScholesInput -> Double -> Double -> Greeks
+calculateGreeks :: Inputs -> Double -> Double -> Greeks
 calculateGreeks input d1Value d2Value = Greeks {..}
   where
     -- Standard normal PDF at d1, used in multiple Greeks
     normalPdfAtD1 = standardNormalPdf d1Value
-    tYears = input.timeToExpiry.days / 365.0 -- Convert days to years
+    tYears = getTimeToExpiryDays input.timeToExpiry / 365.0 -- Convert days to years
     discountFactor = exp (-(input.riskFreeRate * tYears))
     sqrtTimeToExpiry = sqrt tYears
 

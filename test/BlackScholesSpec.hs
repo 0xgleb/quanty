@@ -21,14 +21,21 @@ epsilon :: Double
 epsilon = 1e-10
 
 
+-- | Helper to create TimeToExpiryDays in tests (unsafe, panics on invalid values)
+unsafeMkTimeToExpiryDays :: Double -> TimeToExpiryDays
+unsafeMkTimeToExpiryDays d = case mkTimeToExpiryDays d of
+  Right t -> t
+  Left err -> panic $ "Invalid TimeToExpiryDays in test: " <> show err
+
+
 -- | Helper to create a standard ATM (at-the-money) call option for testing
 -- Using 30 days to expiry
-standardAtmCall :: BlackScholesInput
+standardAtmCall :: BlackScholes.Inputs
 standardAtmCall =
-  BlackScholesInput
+  BlackScholes.Inputs
     { spot = 100.0
     , strike = 100.0
-    , timeToExpiry = TimeToExpiryDays 30
+    , timeToExpiry = unsafeMkTimeToExpiryDays 30
     , volatility = 0.2
     , riskFreeRate = 0.05
     , kind = Call
@@ -36,7 +43,7 @@ standardAtmCall =
 
 
 -- | Helper to create a standard ATM put option for testing
-standardAtmPut :: BlackScholesInput
+standardAtmPut :: BlackScholes.Inputs
 standardAtmPut = standardAtmCall {kind = Put}
 
 
@@ -67,10 +74,10 @@ spec = do
 
     it "prices deep ITM call close to intrinsic value" $ do
       let input =
-            BlackScholesInput
+            BlackScholes.Inputs
               { spot = 150.0
               , strike = 100.0
-              , timeToExpiry = TimeToExpiryDays 1 -- 1 day to expiry
+              , timeToExpiry = unsafeMkTimeToExpiryDays 1 -- 1 day to expiry
               , volatility = 0.2
               , riskFreeRate = 0.05
               , kind = Call
@@ -81,10 +88,10 @@ spec = do
 
     it "prices deep OTM call close to zero" $ do
       let input =
-            BlackScholesInput
+            BlackScholes.Inputs
               { spot = 50.0
               , strike = 100.0
-              , timeToExpiry = TimeToExpiryDays 1 -- 1 day to expiry
+              , timeToExpiry = unsafeMkTimeToExpiryDays 1 -- 1 day to expiry
               , volatility = 0.2
               , riskFreeRate = 0.05
               , kind = Call
@@ -118,10 +125,10 @@ spec = do
       "option price is always non-negative (allowing for floating point precision)"
       $ \spotPrice strikePrice timeDays volatility rate ->
         let validInput =
-              BlackScholesInput
+              BlackScholes.Inputs
                 { spot = clampRange 10 1000 (abs spotPrice)
                 , strike = clampRange 10 1000 (abs strikePrice)
-                , timeToExpiry = TimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
+                , timeToExpiry = unsafeMkTimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
                 , volatility = clampRange 0.1 2.5 (abs volatility)
                 , riskFreeRate = clampRange 0 0.15 (abs rate)
                 , kind = Call
@@ -131,10 +138,10 @@ spec = do
     prop "call delta is between 0 and 1" $
       \spotPrice strikePrice timeDays volatility rate ->
         let validInput =
-              BlackScholesInput
+              BlackScholes.Inputs
                 { spot = clampRange 10 1000 (abs spotPrice)
                 , strike = clampRange 10 1000 (abs strikePrice)
-                , timeToExpiry = TimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
+                , timeToExpiry = unsafeMkTimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
                 , volatility = clampRange 0.1 2.5 (abs volatility)
                 , riskFreeRate = clampRange 0 0.15 (abs rate)
                 , kind = Call
@@ -145,10 +152,10 @@ spec = do
     prop "put delta is between -1 and 0" $
       \spotPrice strikePrice timeDays volatility rate ->
         let validInput =
-              BlackScholesInput
+              BlackScholes.Inputs
                 { spot = clampRange 10 1000 (abs spotPrice)
                 , strike = clampRange 10 1000 (abs strikePrice)
-                , timeToExpiry = TimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
+                , timeToExpiry = unsafeMkTimeToExpiryDays (clampRange 3 180 (abs timeDays)) -- 3-180 days
                 , volatility = clampRange 0.1 2.5 (abs volatility)
                 , riskFreeRate = clampRange 0 0.15 (abs rate)
                 , kind = Put
@@ -159,10 +166,10 @@ spec = do
     prop "gamma is always positive and finite" $
       \spotPrice strikePrice timeDays volatility rate ->
         let validInput =
-              BlackScholesInput
+              BlackScholes.Inputs
                 { spot = clampRange 50 100 (abs spotPrice) -- 50-150 range
                 , strike = clampRange 50 100 (abs strikePrice) -- 50-150 range
-                , timeToExpiry = TimeToExpiryDays (clampRange 7 180 (abs timeDays)) -- 7-180 days
+                , timeToExpiry = unsafeMkTimeToExpiryDays (clampRange 7 180 (abs timeDays)) -- 7-180 days
                 , volatility = clampRange 0.15 2.5 (abs volatility)
                 , riskFreeRate = clampRange 0 0.15 (abs rate)
                 , kind = Call

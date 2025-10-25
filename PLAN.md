@@ -54,22 +54,22 @@ options as it's the foundation for options pricing.
 
 Add Black-Scholes pricing endpoint to the Servant API.
 
-- [ ] Update `src/Api.hs` to add `blackScholes` endpoint:
-  - Route: `POST /api/v1/black-scholes`
-  - Request: `BlackScholesInput` (JSON)
-  - Response: `OptionPrice` (JSON)
-- [ ] Import `BlackScholes` module types
-- [ ] Implement handler that calls `BlackScholes.calculatePrice`
-- [ ] Add input validation in handler:
+- [x] Update `src/Api.hs` to add `blackScholes` endpoint:
+  - Route: `POST /black-scholes`
+  - Request: `BlackScholes.Inputs` (JSON)
+  - Response: `BlackScholes.OptionPrice` (JSON)
+- [x] Import `BlackScholes` module types
+- [x] Implement handler that calls `BlackScholes.calculatePriceWithGreeks`
+- [x] Add input validation in handler:
   - Spot price > 0
   - Strike price > 0
   - Time to expiry > 0
   - Volatility > 0
   - All values are finite (no NaN/Infinity)
-- [ ] Add error handling for invalid inputs (return 400 with error message)
-- [ ] Update OpenAPI spec generation to include new endpoint
-- [ ] Verify `stack build --fast` succeeds
-- [ ] Verify `stack test --fast` passes
+- [x] Add error handling for invalid inputs (return 400 with error message)
+- [x] Update OpenAPI spec generation to include new endpoint
+- [x] Verify `stack build --fast` succeeds
+- [x] Verify `stack test --fast` passes
 
 **Reasoning**: Using NamedRoutes pattern consistent with existing API. POST
 request is appropriate since we're performing a computation (not idempotent).
