@@ -25,6 +25,7 @@ dependencies:
   - text
   - bytestring
   - lens
+  - erf
 
 language: GHC2024
 
@@ -60,6 +61,7 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - quanty
+      - QuickCheck
     build-tools:
       - hspec-discover
 

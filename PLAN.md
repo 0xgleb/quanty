@@ -17,32 +17,33 @@ Implement the most basic version of Black-Scholes calculator where:
 
 Create `src/BlackScholes.hs` module with types, pricing logic, and tests.
 
-- [ ] Create `src/BlackScholes.hs` with module structure
-- [ ] Define core types:
+- [x] Create `src/BlackScholes.hs` with module structure
+- [x] Define core types:
   - `OptionType` (Call | Put)
+  - `TimeToExpiryYears` newtype for explicit units
   - `BlackScholesInput` (spot, strike, timeToExpiry, volatility, riskFreeRate,
-    optionType)
+    kind)
   - `Greeks` (delta, gamma, vega, theta, rho)
   - `OptionPrice` (price, greeks)
-- [ ] Implement Black-Scholes pricing formula:
+- [x] Implement Black-Scholes pricing formula:
   - `calculatePrice :: BlackScholesInput -> OptionPrice`
   - d1 and d2 calculations
   - Call and Put pricing
   - Cumulative normal distribution (CDF)
-- [ ] Implement Greeks calculations:
+- [x] Implement Greeks calculations:
   - Delta ($\partial V/\partial S$)
   - Gamma ($\partial^2 V/\partial S^2$)
   - Vega ($\partial V/\partial \sigma$)
   - Theta ($\partial V/\partial t$)
   - Rho ($\partial V/\partial r$)
-- [ ] Add JSON serialization (ToJSON/FromJSON instances)
-- [ ] Add OpenAPI schema instances (ToSchema)
-- [ ] Create `test/BlackScholesSpec.hs` with comprehensive tests:
-  - Test known values (spot = strike = 100, etc.)
+- [x] Add JSON serialization (ToJSON/FromJSON instances)
+- [x] Add OpenAPI schema instances (ToSchema)
+- [x] Create `test/BlackScholesSpec.hs` with comprehensive tests:
+  - Test known values (ATM options, ITM, OTM)
   - Test Call-Put parity property
-  - Test Greeks sum to expected values
-  - Test boundary conditions (zero volatility, zero time)
-- [ ] Run `stack build --fast` and `stack test --fast` to verify
+  - Test Greeks ranges (delta, gamma, vega, theta, rho)
+  - QuickCheck property tests with realistic parameter ranges
+- [x] Run `stack build --fast` and `stack test --fast` to verify
 
 **Reasoning**: Package-by-feature approach - all Black-Scholes code lives in one
 module. We implement the mathematical model first with comprehensive testing
