@@ -68,19 +68,20 @@ newtype TimeToExpiryDays = TimeToExpiryDays
   deriving anyclass (ToSchema)
 
 
--- | Custom ToJSON instance that serializes to just the days value
+-- | Custom ToJSON instance that preserves the object structure
 instance Aeson.ToJSON TimeToExpiryDays where
-  toJSON (TimeToExpiryDays daysValue) = Aeson.toJSON daysValue
+  toJSON (TimeToExpiryDays daysValue) =
+    Aeson.object [("days", Aeson.toJSON daysValue)]
 
 
 -- | Custom FromJSON instance that validates using the smart constructor
 instance Aeson.FromJSON TimeToExpiryDays where
-  parseJSON = Aeson.withScientific "TimeToExpiryDays" $ \scientific ->
-    let daysValue = realToFrac scientific
-     in case mkTimeToExpiryDays daysValue of
-          Left TimeToExpiryNotFinite -> Fail.fail "Time to expiry must be finite (not NaN or Infinity)"
-          Left TimeToExpiryNotPositive -> Fail.fail "Time to expiry must be positive"
-          Right timeToExpiry -> pure timeToExpiry
+  parseJSON = Aeson.withObject "TimeToExpiryDays" $ \obj -> do
+    daysValue <- obj Aeson..: "days"
+    case mkTimeToExpiryDays daysValue of
+      Left TimeToExpiryNotFinite -> Fail.fail "Time to expiry must be finite (not NaN or Infinity)"
+      Left TimeToExpiryNotPositive -> Fail.fail "Time to expiry must be positive"
+      Right timeToExpiry -> pure timeToExpiry
 
 
 -- | Smart constructor for 'TimeToExpiryDays'.

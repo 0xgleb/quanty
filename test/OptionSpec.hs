@@ -67,32 +67,32 @@ spec = do
         Left err -> expectationFailure $ "Unexpected error: " <> show err
 
   describe "TimeToExpiryDays - JSON Serialization" $ do
-    it "serializes to a number" $ do
+    it "serializes to an object with days field" $ do
       case mkTimeToExpiryDays 30 of
-        Right t -> Aeson.encode t `shouldBe` "30"
+        Right t -> Aeson.encode t `shouldBe` "{\"days\":30}"
         Left err -> expectationFailure $ "Unexpected error: " <> show err
 
     it "deserializes valid positive number" $ do
-      let json = "30"
+      let json = "{\"days\":30}"
           result = Aeson.decode json :: Maybe TimeToExpiryDays
       case result of
         Just t -> getTimeToExpiryDays t `shouldBe` 30
         Nothing -> expectationFailure "Failed to deserialize valid JSON"
 
     it "deserializes fractional values" $ do
-      let json = "7.5"
+      let json = "{\"days\":7.5}"
           result = Aeson.decode json :: Maybe TimeToExpiryDays
       case result of
         Just t -> getTimeToExpiryDays t `shouldBe` 7.5
         Nothing -> expectationFailure "Failed to deserialize valid JSON"
 
     it "rejects zero in JSON" $ do
-      let json = "0"
+      let json = "{\"days\":0}"
           result = Aeson.decode json :: Maybe TimeToExpiryDays
       result `shouldBe` Nothing
 
     it "rejects negative values in JSON" $ do
-      let json = "-5"
+      let json = "{\"days\":-5}"
           result = Aeson.decode json :: Maybe TimeToExpiryDays
       result `shouldBe` Nothing
 

@@ -79,38 +79,40 @@ Input validation at API layer protects business logic from invalid data.
 
 Generate TypeScript types and client from OpenAPI spec.
 
-- [ ] Run `stack exec generate-openapi` to generate `openapi.json`
-- [ ] Run `pnpm generate-client` to generate TypeScript client
-- [ ] Verify generated types include:
-  - `BlackScholesInput` interface
+- [x] Run `stack exec generate-openapi` to generate `openapi.json`
+- [x] Run `pnpm generate-client` to generate TypeScript client
+- [x] Verify generated types include:
+  - `Inputs` interface
   - `OptionPrice` interface
   - `Greeks` interface
-  - `OptionType` enum/type
-  - `postApiV1BlackScholes` function
-- [ ] Commit generated client code
+  - `OptionKind` type ('Call' | 'Put')
+  - `postBlackScholes` function
+- [x] Ensure `.gitignore` excludes generated client code (already present)
+- [x] Add note in README about regenerating client after API changes
 
 **Reasoning**: Auto-generation ensures type safety from backend to frontend. Any
 changes to backend types automatically flow to frontend after regeneration.
+Generated code should never be committed - it's regenerated on each build.
 
 ## Task 4. Frontend - Effect Service
 
 Create Effect-based service for Black-Scholes API calls.
 
-- [ ] Create `frontend/src/lib/services/blackScholes.ts`
-- [ ] Define Effect Schemas for request/response validation:
-  - `BlackScholesInputSchema` with refinements (positive numbers, finite values)
+- [x] Create `frontend/src/lib/services/blackScholes.ts`
+- [x] Define Effect Schemas for request/response validation:
+  - `InputsSchema` with refinements (positive numbers, finite values)
   - `OptionPriceSchema` for response validation
-- [ ] Create `BlackScholesService` using `Context.Tag`
-- [ ] Implement `calculatePrice` function returning
-      `Effect<OptionPrice, ApiError, HttpClient>`
-- [ ] Add timeout (5 seconds) with `Effect.timeout`
-- [ ] Add error handling with proper error types:
+- [x] Create `BlackScholesService` using `Context.Tag`
+- [x] Implement `calculatePrice` function returning
+      `Effect<OptionPrice, BlackScholesError>`
+- [x] Add timeout (5 seconds) with `Effect.timeout`
+- [x] Add error handling with proper error types:
   - `NetworkError` for connection issues
   - `ValidationError` for invalid inputs
   - `ApiError` for server errors
-- [ ] Create `BlackScholesServiceLive` Layer
-- [ ] Export service interface
-- [ ] Run `pnpm lint` and `pnpm format`
+- [x] Create `BlackScholesServiceLive` Layer
+- [x] Export service interface
+- [x] Run `pnpm lint` and `pnpm format`
 
 **Reasoning**: Effect provides type-safe async operations with explicit error
 handling. Schema validation at runtime catches issues with external data.
