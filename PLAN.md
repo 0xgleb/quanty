@@ -121,24 +121,25 @@ testing.
 
 ## Task 5. Frontend - Calculator UI Component
 
-Build calculator form with parameter inputs.
+Build calculator form with parameter inputs by replacing placeholder content.
 
-- [ ] Create `frontend/src/routes/calculator/+page.svelte`
-- [ ] Add form with shadcn-svelte components:
+- [x] Replace placeholder content in `frontend/src/routes/+page.svelte` with
+      calculator
+- [x] Add form with shadcn-svelte components:
   - Option Type selector (Call/Put radio buttons or select)
   - Spot Price input (number)
   - Strike Price input (number)
-  - Time to Expiry input (number, in years)
+  - Time to Expiry input (number, in days)
   - Volatility input (number, as decimal e.g., 0.25 for 25%)
   - Risk-Free Rate input (number, as decimal e.g., 0.05 for 5%)
-- [ ] Use Svelte 5 runes for form state (`$state`)
-- [ ] Create mutation using `createMutation` from Effect query system
-- [ ] Wire up form submission to call `BlackScholesService.calculatePrice`
-- [ ] Add loading state while calculation runs
-- [ ] Display validation errors from Schema
-- [ ] Add helpful labels and descriptions for each input
-- [ ] Add input placeholders with example values
-- [ ] Run `pnpm lint` and `pnpm format`
+- [x] Use Svelte 5 runes for form state (`$state`)
+- [x] Create mutation using `createMutation` from Effect query system
+- [x] Wire up form submission to call `BlackScholesService.calculatePrice`
+- [x] Add loading state while calculation runs
+- [x] Display validation errors from Schema
+- [x] Add helpful labels and descriptions for each input
+- [x] Add input placeholders with example values
+- [x] Run `pnpm lint` and `pnpm format`
 
 **Reasoning**: Form-first approach for calculator UI. shadcn-svelte provides
 accessible, styled components. Svelte 5 runes give reactive state management.

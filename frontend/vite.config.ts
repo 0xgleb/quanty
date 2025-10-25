@@ -23,5 +23,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       $lib: "/src/lib",
     },
+    server: {
+      deps: {
+        inline: [/bits-ui/, /katex/],
+      },
+    },
   },
 }))
