@@ -9,6 +9,7 @@
   import { BlackScholesServiceLive } from "$lib/services/blackScholes"
   import type { Inputs, OptionKind } from "$lib/api/generated/types.gen"
   import katex from "katex"
+  import { formatNumber } from "$lib/formatNumber"
 
   let callFormulaElement: HTMLDivElement | undefined = $state()
   let dPlusFormulaElement: HTMLDivElement | undefined = $state()
@@ -63,7 +64,7 @@
 
   function handleSubmit(event: Event) {
     event.preventDefault()
-    calculateMutation.mutate()
+    calculateMutation.mutate(undefined)
   }
 
   function handleReset() {
@@ -235,7 +236,7 @@
               <Input
                 id="volatility"
                 type="number"
-                step="0.01"
+                step="0.001"
                 placeholder="e.g., 0.45 (current BTC IV ~45%)"
                 bind:value={formData.volatility}
                 required
@@ -253,7 +254,7 @@
               <Input
                 id="riskFreeRate"
                 type="number"
-                step="0.01"
+                step="0.001"
                 placeholder="e.g., 0.039 (current 3M T-bill ~3.9%)"
                 bind:value={formData.riskFreeRate}
                 required
@@ -299,98 +300,135 @@
         </Card.Content>
       </Card.Root>
 
-      <Card.Root>
-        <Card.Header>
-          <Card.Title>Black-Scholes Formula</Card.Title>
-          <Card.Description>
-            European option pricing
-          </Card.Description>
-        </Card.Header>
-        <Card.Content>
-          <div class="space-y-6">
-            <div>
-              <p class="text-xs font-medium text-muted-foreground mb-2">Call Option:</p>
-              <div bind:this={callFormulaElement} class="text-center"></div>
-            </div>
+      <div class="space-y-6">
+        <Card.Root>
+          <Card.Header>
+            <Card.Title>Black-Scholes Formula</Card.Title>
+            <Card.Description>
+              European option pricing
+            </Card.Description>
+          </Card.Header>
+          <Card.Content>
+            <div class="space-y-6">
+              <div>
+                <p class="text-xs font-medium text-muted-foreground mb-2">Call Option:</p>
+                <div bind:this={callFormulaElement} class="text-center"></div>
+              </div>
 
-            <div>
-              <p class="text-xs font-medium text-muted-foreground mb-2">where:</p>
-              <div bind:this={dPlusFormulaElement} class="text-center"></div>
-            </div>
+              <div>
+                <p class="text-xs font-medium text-muted-foreground mb-2">where:</p>
+                <div bind:this={dPlusFormulaElement} class="text-center"></div>
+              </div>
 
-            <div>
-              <div bind:this={dMinusFormulaElement} class="text-center"></div>
-            </div>
+              <div>
+                <div bind:this={dMinusFormulaElement} class="text-center"></div>
+              </div>
 
-            <div>
-              <p class="text-xs font-medium text-muted-foreground mb-2">Put Option:</p>
-              <div bind:this={putFormulaElement} class="text-center"></div>
-            </div>
+              <div>
+                <p class="text-xs font-medium text-muted-foreground mb-2">Put Option:</p>
+                <div bind:this={putFormulaElement} class="text-center"></div>
+              </div>
 
-            <div class="text-xs text-muted-foreground space-y-1 pt-2 border-t">
-              <p><em>S<sub>t</sub></em> = Spot price</p>
-              <p><em>K</em> = Strike price</p>
-              <p><em>T-t</em> = Time to expiry</p>
-              <p><em>r</em> = Risk-free rate</p>
-              <p><em>σ</em> = Volatility</p>
-              <p><em>N(·)</em> = CDF of standard normal</p>
+              <div class="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+                <p><em>S<sub>t</sub></em> = Spot price</p>
+                <p><em>K</em> = Strike price</p>
+                <p><em>T-t</em> = Time to expiry</p>
+                <p><em>r</em> = Risk-free rate</p>
+                <p><em>σ</em> = Volatility</p>
+                <p><em>N(·)</em> = CDF of standard normal</p>
+              </div>
             </div>
-          </div>
-        </Card.Content>
-      </Card.Root>
+          </Card.Content>
+        </Card.Root>
+
+        {#if calculateMutation.isSuccess && calculateMutation.data}
+          <Card.Root>
+            <Card.Header>
+              <Card.Title>Results</Card.Title>
+              <Card.Description>
+                Option price and Greeks for your contract
+              </Card.Description>
+            </Card.Header>
+            <Card.Content>
+              <div class="space-y-6">
+                <div>
+                  <div class="text-sm text-muted-foreground mb-1">Option Price</div>
+                  <div class="text-3xl font-bold">
+                    ${formatNumber(calculateMutation.data.price, 4)}
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    Fair value of the {optionKind.toLowerCase()} option
+                  </p>
+                </div>
+
+                <div class="space-y-4 pt-4 border-t">
+                  <h3 class="text-sm font-medium">Greeks</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-muted-foreground">Delta (Δ)</span>
+                        <span class="text-lg font-medium">
+                          {formatNumber(calculateMutation.data.greeks.delta, 4)}
+                        </span>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Rate of change of option price per $1 change in underlying
+                      </p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-muted-foreground">Gamma (Γ)</span>
+                        <span class="text-lg font-medium">
+                          {formatNumber(calculateMutation.data.greeks.gamma, 6)}
+                        </span>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Rate of change of delta per $1 change in underlying
+                      </p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-muted-foreground">Vega (ν)</span>
+                        <span class="text-lg font-medium">
+                          {formatNumber(calculateMutation.data.greeks.vega, 4)}
+                        </span>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Change in option price per 1% change in volatility
+                      </p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-muted-foreground">Theta (Θ)</span>
+                        <span class="text-lg font-medium">
+                          {formatNumber(calculateMutation.data.greeks.theta, 4)}
+                        </span>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Daily time decay - option value lost per day
+                      </p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-muted-foreground">Rho (ρ)</span>
+                        <span class="text-lg font-medium">
+                          {formatNumber(calculateMutation.data.greeks.rho, 4)}
+                        </span>
+                      </div>
+                      <p class="text-xs text-muted-foreground">
+                        Change in option price per 1% change in interest rate
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card.Content>
+          </Card.Root>
+        {/if}
+      </div>
   </div>
-
-  {#if calculateMutation.isSuccess && calculateMutation.data}
-      <Card.Root>
-        <Card.Header>
-          <Card.Title>Results</Card.Title>
-          <Card.Description>
-            Option price and Greeks for your contract
-          </Card.Description>
-        </Card.Header>
-        <Card.Content>
-          <div class="space-y-4">
-            <div>
-              <div class="text-sm text-muted-foreground mb-1">Option Price</div>
-              <div class="text-3xl font-bold">
-                ${calculateMutation.data.price.toFixed(4)}
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 pt-4 border-t">
-              <div>
-                <div class="text-sm text-muted-foreground">Delta (Δ)</div>
-                <div class="text-lg font-medium">
-                  {calculateMutation.data.greeks.delta.toFixed(4)}
-                </div>
-              </div>
-              <div>
-                <div class="text-sm text-muted-foreground">Gamma (Γ)</div>
-                <div class="text-lg font-medium">
-                  {calculateMutation.data.greeks.gamma.toFixed(6)}
-                </div>
-              </div>
-              <div>
-                <div class="text-sm text-muted-foreground">Vega (ν)</div>
-                <div class="text-lg font-medium">
-                  {calculateMutation.data.greeks.vega.toFixed(4)}
-                </div>
-              </div>
-              <div>
-                <div class="text-sm text-muted-foreground">Theta (Θ)</div>
-                <div class="text-lg font-medium">
-                  {calculateMutation.data.greeks.theta.toFixed(4)}
-                </div>
-              </div>
-              <div>
-                <div class="text-sm text-muted-foreground">Rho (ρ)</div>
-                <div class="text-lg font-medium">
-                  {calculateMutation.data.greeks.rho.toFixed(4)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card.Content>
-      </Card.Root>
-    {/if}
 </div>

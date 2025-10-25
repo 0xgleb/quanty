@@ -2,6 +2,7 @@ import { Context, Data, Effect, Layer } from "effect"
 import * as Schema from "@effect/schema/Schema"
 import type { Inputs, OptionPrice } from "$lib/api/generated/types.gen"
 import { postBlackScholes } from "$lib/api/generated/sdk.gen"
+import { client } from "$lib/api/client"
 
 // Error types for Black-Scholes service
 export class NetworkError extends Data.TaggedError("NetworkError")<{
@@ -92,6 +93,7 @@ export const BlackScholesServiceLive = Layer.succeed(
         const result = yield* Effect.tryPromise({
           try: () =>
             postBlackScholes({
+              client,
               body: validated,
             }),
           catch: err =>

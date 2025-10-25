@@ -149,27 +149,58 @@ Effect mutation handles async submission with proper loading/error states.
 
 Display pricing results and Greeks.
 
-- [ ] Add results section in calculator page (below form)
-- [ ] Display option price prominently (large text)
-- [ ] Create Greeks table showing all five Greeks:
+- [x] Add results section in calculator page (below form)
+- [x] Display option price prominently (large text)
+- [x] Create Greeks table showing all five Greeks:
   - Delta with description
   - Gamma with description
   - Vega with description
   - Theta with description
   - Rho with description
-- [ ] Add tooltips explaining what each Greek measures
-- [ ] Show results only after successful calculation
-- [ ] Format numbers appropriately:
+- [x] Add tooltips explaining what each Greek measures
+- [x] Show results only after successful calculation
+- [x] Format numbers appropriately:
   - Price: 2-4 decimal places
   - Greeks: scientific notation if very small
-- [ ] Add units/context for each value
-- [ ] Run `pnpm lint` and `pnpm format`
+- [x] Add units/context for each value
+- [x] Run `pnpm lint` and `pnpm format`
 
 **Reasoning**: Clear visual hierarchy with price as primary result and Greeks as
 secondary details. Educational tooltips help users understand the outputs.
 Conditional rendering prevents showing stale data.
 
-## Task 7. Frontend - Error Handling & Polish
+## Task 7. Backend - Structured Logging
+
+Add structured logging to backend with OpenTelemetry compatibility.
+
+- [ ] Add `katip` library to `package.yaml` dependencies
+- [ ] Create logging configuration in `src/Logging.hs`:
+  - Define log severity levels (Debug, Info, Warning, Error)
+  - Set up console scribes for development
+  - Make OTEL-compatible (JSON-structured logs with trace context)
+- [ ] Update `src/Main.hs` to initialize logging on startup
+- [ ] Add logging to API handlers in `src/Api.hs`:
+  - Log incoming requests (endpoint, method)
+  - Log request validation failures
+  - Log successful responses
+  - Log errors with full context
+- [ ] Add logging to `src/BlackScholes.hs`:
+  - Log calculation inputs (sanitized)
+  - Log calculation results
+  - Log any numerical edge cases
+- [ ] Create `KatipContext` constraint for handlers
+- [ ] Add correlation IDs for request tracing
+- [ ] Verify logs appear in console with proper structure
+- [ ] Run `stack build --fast` and `stack test --fast` to verify
+- [ ] Run `fourmolu` to format code
+
+**Reasoning**: Structured logging with katip provides JSON-formatted logs that
+can be easily parsed and analyzed. Katip's namespace and context features map
+well to OpenTelemetry's span/trace model, making future OTEL integration
+straightforward. Using katip now gives us production-ready logging with minimal
+overhead while keeping the door open for advanced telemetry later.
+
+## Task 8. Frontend - Error Handling & Polish
 
 Add comprehensive error handling and UX improvements.
 
@@ -188,7 +219,7 @@ Add comprehensive error handling and UX improvements.
 get started quickly. Responsive design ensures usability on all devices.
 Linting/formatting maintains code quality.
 
-## Task 8. Testing
+## Task 9. Testing
 
 Add tests for frontend calculator.
 
@@ -204,7 +235,7 @@ Add tests for frontend calculator.
 **Reasoning**: Tests ensure calculator works correctly and handles errors
 gracefully. Mocking Effect services allows testing without backend dependency.
 
-## Task 9. Documentation Updates
+## Task 10. Documentation Updates
 
 Update project documentation to reflect new feature.
 
