@@ -7,6 +7,9 @@ settings:
 importers:
   .:
     dependencies:
+      "@bjorn3/browser_wasi_shim":
+        specifier: ^0.4.2
+        version: 0.4.2
       "@effect/schema":
         specifier: ^0.75.5
         version: 0.75.5(effect@3.18.4)
@@ -156,6 +159,12 @@ packages:
         integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==,
       }
     engines: { node: ">=6.9.0" }
+
+  "@bjorn3/browser_wasi_shim@0.4.2":
+    resolution:
+      {
+        integrity: sha512-/iHkCVUG3VbcbmEHn5iIUpIrh7a7WPiwZ3sHy4HZKZzBdSadwdddYDZAII2zBvQYV0Lfi8naZngPCN7WPHI/hA==,
+      }
 
   "@csstools/color-helpers@5.1.0":
     resolution:
@@ -3296,6 +3305,8 @@ snapshots:
   "@babel/helper-validator-identifier@7.28.5": {}
 
   "@babel/runtime@7.28.4": {}
+
+  "@bjorn3/browser_wasi_shim@0.4.2": {}
 
   "@csstools/color-helpers@5.1.0": {}
 

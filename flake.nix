@@ -11,9 +11,14 @@
       nixpkgs.follows = "nixpkgs";
       git-hooks.follows = "git-hooks";
     };
+
+    ghc-wasm-meta.url =
+      "gitlab:haskell-wasm/ghc-wasm-meta?host=gitlab.haskell.org";
+    ghc-wasm-meta.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-utils, git-hooks, devenv, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, git-hooks, devenv, ghc-wasm-meta, ...
+    }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -43,11 +48,11 @@
           inherit inputs pkgs;
           modules = [{
             # https://devenv.sh/reference/options/
-            packages = with pkgs.haskellPackages; [
+            packages = (with pkgs.haskellPackages; [
               haskell-language-server
               fourmolu
               hlint
-            ];
+            ]) ++ [ ghc-wasm-meta.packages.${system}.all_9_12 ];
 
             languages = {
               nix.enable = true;

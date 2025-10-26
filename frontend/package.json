@@ -57,6 +57,7 @@
     "arrowParens": "avoid"
   },
   "dependencies": {
+    "@bjorn3/browser_wasi_shim": "^0.4.2",
     "@effect/schema": "^0.75.5",
     "effect": "^3.18.4",
     "katex": "^0.16.25"
