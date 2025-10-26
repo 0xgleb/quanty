@@ -54,16 +54,7 @@
 
       const service = yield* BlackScholesService
       return yield* service.calculatePrice(inputs)
-    }).pipe(
-      Effect.provide(BlackScholesServiceLive),
-      Effect.catchAll((error) =>
-        Effect.fail(
-          error instanceof Error
-            ? error
-            : new Error("Unexpected error occurred"),
-        ),
-      ),
-    ),
+    }).pipe(Effect.provide(BlackScholesServiceLive)),
   )
 
   const handleSubmit = (event: Event) => {

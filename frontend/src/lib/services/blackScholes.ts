@@ -152,7 +152,9 @@ export const BlackScholesServiceLive = Layer.succeed(
           ),
         )
 
-        yield* Schema.decodeUnknown(OptionPriceSchema)(result).pipe(
+        const validatedResponse = yield* Schema.decodeUnknown(
+          OptionPriceSchema,
+        )(result).pipe(
           Effect.mapError(
             err =>
               new ValidationError({
@@ -161,7 +163,7 @@ export const BlackScholesServiceLive = Layer.succeed(
           ),
         )
 
-        return result
+        return validatedResponse
       }),
   }),
 )
