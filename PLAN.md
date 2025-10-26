@@ -198,46 +198,37 @@ across the WASM boundary.
 **Reasoning:** Type safety is critical. Manual TypeScript definitions will drift
 from Haskell types. Automated generation ensures they stay in sync.
 
-- [ ] Add `aeson-typescript` to WASM project dependencies
-- [ ] Derive `TypeScript` instance for existing types
+- [x] Add `aeson-typescript` to WASM project dependencies
+  - Added `aeson-typescript >=0.6` to `wasm/quanty-wasm.cabal`
+  - Uses Template Haskell for type derivation
+- [x] Create test type to verify aeson-typescript works
 
   ```haskell
-  import Data.Aeson.TypeScript.TH
-
-  data BlackScholesInput = BlackScholesInput { ... }
+  data TestMessage = TestMessage
+    { message :: Text
+    , value :: Int
+    }
     deriving stock (Generic, Show, Eq)
-    deriving anyclass (ToJSON, FromJSON, TypeScript)
+    deriving anyclass (ToJSON, FromJSON)
+
+  $(TS.deriveTypeScript defaultOptions ''TestMessage)
   ```
 
-- [ ] Create type generation script `wasm/gen-types.hs`
-  ```haskell
-  main :: IO ()
-  main = do
-    writeTypeScriptDeclarations
-      "frontend/src/lib/wasm/types.ts"
-      (Proxy @BlackScholesInput)
-    -- Add other types
-  ```
-- [ ] Integrate type generation into build process
-  - Add to `wasm/build.sh`
-  - Run before TypeScript compilation
-- [ ] Update frontend to use generated types
-  - Import from `lib/wasm/types.ts`
-  - Remove manual type definitions
-- [ ] Write manual function declarations
-
-  ```typescript
-  // lib/wasm/bindings.ts
-  import type { BlackScholesInput, OptionPrice } from "./types";
-
-  export interface QuantyWASM {
-    calculateBlackScholes(input: BlackScholesInput): Promise<OptionPrice>;
-  }
-  ```
-
-- [ ] Test type safety
-  - Intentionally break types in Haskell
-  - Verify TypeScript compilation fails
+- [x] Create type generation script `wasm/gen-types.hs`
+  - Compiles to WASM with wasm32-wasi-cabal
+  - Runs with wasmtime during build
+  - Generates to `frontend/src/lib/wasm/types.ts`
+- [x] Integrate type generation into build process
+  - Added to `wasm/build.sh`
+  - Runs after FFI glue generation
+  - Uses `wasmtime --dir=..` for filesystem access
+  - Post-processes output to add `export` keywords
+- [x] Test type safety with TestMessage
+  - Created test TypeScript file using generated types
+  - Intentionally broke Haskell type (renamed `message` to `messageText`)
+  - Verified TypeScript compilation failed with type error
+  - Restored correct type, verified compilation succeeds
+  - ✅ Type safety works across the WASM boundary!
 
 **Go/No-Go Decision:**
 
@@ -250,33 +241,64 @@ from Haskell types. Automated generation ensures they stay in sync.
 
 Implement Black-Scholes calculation in WASM module using existing Haskell code.
 
-**Reasoning:** Reuse existing, tested Black-Scholes implementation. Just need to
-add FFI exports.
+**Reasoning:** Reuse existing, tested Black-Scholes implementation. Package by
+feature (BlackScholes) with all types and logic together.
 
-- [ ] Copy Black-Scholes types to WASM module
-  - `wasm/BlackScholes/Types.hs`
-  - Add `TypeScript` deriving to all types
-- [ ] Copy Black-Scholes calculation to WASM module
-  - `wasm/BlackScholes/Calculate.hs`
-  - Pure functions, no changes needed
+**CRITICAL:** Follow package-by-feature, NOT package-by-layer. Everything
+Black-Scholes related goes in ONE module.
+
+- [ ] Create `wasm/BlackScholes.hs` feature module
+  - Copy types from `src/BlackScholes/` (OptionType, BlackScholesInput, etc.)
+  - Copy calculation logic from `src/BlackScholes/`
+  - Add `TypeScript` deriving to all types using Template Haskell
+  - Keep types and calculation together (NO separate Types.hs/Calculate.hs)
+  - Update `gen-types.hs` to generate types for all BlackScholes ADTs
+
 - [ ] Add FFI export for `calculateBlackScholes`
 
   ```haskell
-  foreign export javascript "calculateBlackScholes"
-    calculateBlackScholesFFI :: JSVal -> IO JSVal
+  -- In wasm/BlackScholes.hs
+  module BlackScholes where
 
-  calculateBlackScholesFFI :: JSVal -> IO JSVal
-  calculateBlackScholesFFI inputJS = do
-    inputStr <- jsvalToString inputJS
-    case decode (encodeUtf8 $ toS inputStr) of
-      Nothing -> error "Invalid input"  -- TODO: proper error handling
+  import Data.Aeson (ToJSON, FromJSON, encode, decode)
+  import Data.Aeson.TypeScript (TypeScript)
+
+  -- Types and calculation in same module
+  data OptionType = Call | Put
+    deriving stock (Generic, Show, Eq)
+    deriving anyclass (ToJSON, FromJSON, TypeScript)
+
+  data BlackScholesInput = BlackScholesInput { ... }
+    deriving stock (Generic, Show, Eq)
+    deriving anyclass (ToJSON, FromJSON, TypeScript)
+
+  -- Calculation function
+  calculateBlackScholes :: BlackScholesInput -> OptionPrice
+  calculateBlackScholes = ...
+  ```
+
+- [ ] Add FFI wrapper in `wasm/Main.hs`
+
+  ```haskell
+  import BlackScholes qualified as BS
+
+  foreign export javascript "calculateBlackScholes"
+    calculateBlackScholesFFI :: Text -> IO Text
+
+  calculateBlackScholesFFI :: Text -> IO Text
+  calculateBlackScholesFFI jsonStr = do
+    let jsonBytes = BL.fromStrict $ TE.encodeUtf8 jsonStr
+    case decode jsonBytes of
+      Nothing -> error "Invalid JSON input"
       Just input -> do
-        let result = calculateBlackScholes input
-        stringToJSVal (toS $ decodeUtf8 $ encode result)
+        let result = BS.calculateBlackScholes input
+        pure $ TE.decodeUtf8 $ BL.toStrict $ encode result
   ```
 
 - [ ] Update type generation to include all Black-Scholes types
-  - `BlackScholesInput`, `OptionPrice`, `Greeks`, `OptionType`, etc.
+  - Generate TypeScript types from `wasm/BlackScholes.hs`
+  - All types in one place (feature-based)
+
 - [ ] Rebuild WASM module with Black-Scholes
 - [ ] Verify calculation correctness
   - Test with known inputs

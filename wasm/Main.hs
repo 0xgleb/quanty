@@ -1,11 +1,14 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 module Main where
 
-import Data.Aeson (Value, decode, encode)
+import Data.Aeson (FromJSON, ToJSON, Value, decode, encode)
 import Data.ByteString.Lazy qualified as BL
 import Data.Text (Text)
 import Data.Text.Encoding qualified as TE
+import GHC.Generics (Generic)
 
 
 -- | Pure addition function - no IO, should have no scheduler issues
@@ -52,6 +55,16 @@ validateJson jsonStr =
 -- Note: We've proven bidirectional data passing with doubleValue (Int -> Int).
 -- Proper JSON marshalling with concrete Haskell types will come in Task 5
 -- when we implement BlackScholes types with proper Aeson instances.
+
+-- | Test type for TypeScript generation
+-- This proves aeson-typescript works before we add BlackScholes types
+data TestMessage = TestMessage
+  { message :: Text
+  , value :: Int
+  }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (ToJSON, FromJSON)
+
 
 -- | Main function (required but not called in reactor mode)
 main :: IO ()
