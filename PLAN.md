@@ -63,21 +63,14 @@ Set up GHC WASM toolchain using Nix flakes with `ghc-wasm-meta`.
 **Reasoning:** Nix provides reproducible builds and we're already using it.
 `ghc-wasm-meta` is the official distribution of GHC WASM toolchain.
 
-- [ ] Add `ghc-wasm-meta` input to `flake.nix`
-  ```nix
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    ghc-wasm-meta.url = "gitlab:haskell-wasm/ghc-wasm-meta?host=gitlab.haskell.org";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
-  ```
-- [ ] Add WASM toolchain to `devShells.default.packages`
-  - `ghc-wasm-meta.packages.${system}.all_9_12` (or latest version)
-  - This provides: `wasm32-wasi-ghc`, `wasm32-wasi-cabal`, `wasm32-wasi-ghc-pkg`
-- [ ] Test WASM toolchain availability
-  - Run `wasm32-wasi-ghc --version` in dev shell
-  - Verify post-linker exists:
-    `ls $(wasm32-wasi-ghc --print-libdir)/post-link.mjs`
+- [x] Add `ghc-wasm-meta` input to `flake.nix`
+- [x] Add WASM toolchain to `devShells.default.packages`
+  - `ghc-wasm-meta.packages.${system}.all_9_12`
+  - Provides: `wasm32-wasi-ghc`, `wasm32-wasi-cabal`, `wasm32-wasi-ghc-pkg`
+- [x] Test WASM toolchain availability
+  - GHC WASM: version 9.12.2.20250924 ✓
+  - Cabal: version 3.14.2.0 ✓
+  - Post-linker: verified at expected location ✓
 - [ ] Document WASM toolchain in README.md
   - Add section on WASM development
   - List available WASM commands
