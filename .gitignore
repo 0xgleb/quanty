@@ -4,3 +4,14 @@
 *.cabal
 .pre-commit-config.yaml
 openapi.json
+
+# WASM build artifacts
+wasm/dist/
+wasm/dist-wasm/
+wasm/.cabal-sandbox/
+wasm/cabal.project.local
+wasm/cabal.project.local~
+wasm/test-wasm.mjs
+
+# WASM artifacts copied to frontend
+frontend/static/wasm/dist/
