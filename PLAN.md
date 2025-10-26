@@ -292,93 +292,44 @@ type-safe async operations.
 **Reasoning:** Match existing Effect-based architecture. WASM loading is async
 and can fail, perfect fit for Effect.
 
-- [ ] Create WASM loader utility
+- [x] Create WASM loader utility
+  - Created `frontend/src/lib/wasm/loader.ts` with Effect-based loading
+  - Loads WASM module from `/wasm/dist/quanty.wasm`
+  - Imports and uses `ghc_wasm_jsffi.js` runtime
+  - Double-instantiation pattern for FFI initialization
+  - Wraps WASM exports with typed interface
+  - JSON serialization for calculateBlackScholes
+  - Returns WASMLoadError on failures
 
-  ```typescript
-  // lib/wasm/loader.ts
-  import { WASI } from "@bjorn3/browser_wasi_shim";
-  import type { QuantyWASM } from "./bindings";
+- [x] Create WASMService with Effect
+  - Created `frontend/src/lib/services/wasm.ts`
+  - Follows same pattern as BlackScholesService
+  - Uses Context.GenericTag for service definition
+  - Layer.effect for initialization
+  - Input validation with Schema.decodeUnknown
+  - Output validation with OptionPriceSchema
+  - WASMCalculationError for calculation failures
+  - Effect.gen for readable async flows
 
-  export async function loadQuantyWASM(): Promise<QuantyWASM> {
-    const wasi = new WASI([], [], []);
-    const instance_exports = {};
+- [x] Define WASM error types
+  - Created `frontend/src/lib/errors/wasm.ts`
+  - WASMLoadError with cause field
+  - WASMCalculationError with message and optional cause
+  - getErrorMessage helper for user-friendly errors
+  - Follows same pattern as blackScholes errors
+  - Full test coverage in wasm.test.ts
 
-    const { instance } = await WebAssembly.instantiateStreaming(
-      fetch("/quanty.wasm"),
-      {
-        wasi_snapshot_preview1: wasi.wasiImport,
-        ghc_wasm_jsffi: ghc_wasm_jsffi(instance_exports),
-      },
-    );
+- [x] Add singleton pattern for WASM instance
+  - Implemented in loader.ts with cachedInstance variable
+  - WASM module loads once on first call
+  - Subsequent calls reuse cached instance
+  - Prevents redundant loading and initialization
 
-    Object.assign(instance_exports, instance.exports);
-    wasi.initialize(instance);
-    await instance.exports.hs_init();
-
-    return {
-      calculateBlackScholes: async (input) => {
-        // Call WASM function, parse result
-      },
-    };
-  }
-  ```
-
-- [ ] Create WASMService with Effect
-
-  ```typescript
-  // lib/services/wasm.ts
-  import { Context, Effect, Layer } from "effect";
-
-  export class WASMService extends Context.Tag("WASMService")<
-    WASMService,
-    {
-      readonly calculateBlackScholes: (
-        input: BlackScholesInput,
-      ) => Effect.Effect<OptionPrice, WASMError>;
-    }
-  >() {}
-
-  export const WASMServiceLive = Layer.effect(
-    WASMService,
-    Effect.gen(function* (_) {
-      const wasm = yield* _(Effect.promise(() => loadQuantyWASM()));
-
-      return {
-        calculateBlackScholes: (input) =>
-          Effect.tryPromise({
-            try: () => wasm.calculateBlackScholes(input),
-            catch: (error) => new WASMError({ error }),
-          }),
-      };
-    }),
-  );
-  ```
-
-- [ ] Define WASM error types
-
-  ```typescript
-  // lib/errors/wasm.ts
-  import { Data } from "effect";
-
-  export class WASMLoadError extends Data.TaggedError("WASMLoadError")<{
-    readonly error: unknown;
-  }> {}
-
-  export class WASMCalculationError extends Data.TaggedError(
-    "WASMCalculationError",
-  )<{
-    readonly error: unknown;
-  }> {}
-
-  export type WASMError = WASMLoadError | WASMCalculationError;
-  ```
-
-- [ ] Add singleton pattern for WASM instance
-  - WASM module should load once, reuse across calls
-  - Cache in Layer for dependency injection
-- [ ] Add loading state handling
-  - Show loading indicator while WASM initializes
-  - Handle initialization errors gracefully
+- [x] Add loading state handling
+  - WASMLoadError for all loading failures
+  - Effect-based error handling in WASMService
+  - Graceful error propagation to UI layer
+  - User-friendly error messages via getErrorMessage
 
 ---
 
