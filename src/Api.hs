@@ -80,33 +80,36 @@ server = API {..}
 
     blackScholes :: BlackScholes.Inputs -> Servant.Handler BlackScholes.OptionPrice
     blackScholes input = do
-      -- Validate inputs
       when (input.spot <= 0) $
         Servant.throwError
           Servant.err400
             { Servant.errBody = "Spot price must be positive"
             }
+
       when (input.strike <= 0) $
         Servant.throwError
           Servant.err400
             { Servant.errBody = "Strike price must be positive"
             }
+
       when (getTimeToExpiryDays input.timeToExpiry <= 0) $
         Servant.throwError
           Servant.err400
             { Servant.errBody = "Time to expiry must be positive"
             }
+
       when (input.volatility <= 0) $
         Servant.throwError
           Servant.err400
             { Servant.errBody = "Volatility must be positive"
             }
+
       when (input.riskFreeRate < 0) $
         Servant.throwError
           Servant.err400
             { Servant.errBody = "Risk-free rate must be non-negative"
             }
-      -- Check all values are finite (not NaN or Infinity)
+
       unless
         ( isFinite input.spot
             && isFinite input.strike
@@ -118,11 +121,11 @@ server = API {..}
           Servant.err400
             { Servant.errBody = "All input values must be finite (not NaN or Infinity)"
             }
-      -- Calculate price with Greeks
+
       pure $ BlackScholes.calculatePriceWithGreeks input
 
     isFinite :: Double -> Bool
-    isFinite x = not (isNaN x || isInfinite x)
+    isFinite x = not $ isNaN x || isInfinite x
 
 
 app :: Wai.Application

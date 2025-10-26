@@ -9,16 +9,9 @@
  * formatNumber(1234567.89, 2) // "1,234,567.89"
  * formatNumber(0.123456, 6) // "0.123456"
  */
-export function formatNumber(value: number, decimals: number = 4): string {
-  // Fix to specified decimal places
+export const formatNumber = (value: number, decimals: number = 4): string => {
   const fixed = value.toFixed(decimals)
-
-  // Split into integer and decimal parts
   const [integerPart, decimalPart] = fixed.split(".")
-
-  // Add thousand separators to integer part
   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-
-  // Combine with decimal part
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger
 }

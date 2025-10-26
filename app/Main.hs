@@ -17,4 +17,4 @@ corsPolicy =
 main :: IO ()
 main = do
   putStrLn ("Starting Quanty API server on port 8080..." :: Text)
-  Warp.run 8080 (Cors.cors (const $ Just corsPolicy) Api.app)
+  Warp.run 8080 $ Cors.cors (const $ Just corsPolicy) Api.app

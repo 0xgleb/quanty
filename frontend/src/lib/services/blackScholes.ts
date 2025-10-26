@@ -4,7 +4,6 @@ import type { Inputs, OptionPrice } from "$lib/api/generated/types.gen"
 import { postBlackScholes } from "$lib/api/generated/sdk.gen"
 import { client } from "$lib/api/client"
 
-// Error types for Black-Scholes service
 export class NetworkError extends Data.TaggedError("NetworkError")<{
   cause: unknown
 }> {}
@@ -57,7 +56,6 @@ export const getErrorMessage = (
   }
 }
 
-// Schema for Black-Scholes inputs with validation
 export const InputsSchema = Schema.Struct({
   spot: Schema.Number.pipe(
     Schema.positive({ message: () => "Spot price must be positive" }),
@@ -86,7 +84,6 @@ export const InputsSchema = Schema.Struct({
   kind: Schema.Literal("Call", "Put"),
 })
 
-// Schema for option price response
 export const OptionPriceSchema = Schema.Struct({
   price: Schema.Number,
   greeks: Schema.Struct({
@@ -98,25 +95,21 @@ export const OptionPriceSchema = Schema.Struct({
   }),
 })
 
-// Black-Scholes service interface
 export interface IBlackScholesService {
   calculatePrice: (
     input: Inputs,
   ) => Effect.Effect<OptionPrice, BlackScholesError>
 }
 
-// Service tag for dependency injection
 export const BlackScholesService = Context.GenericTag<IBlackScholesService>(
   "BlackScholesService",
 )
 
-// Live implementation of the service
 export const BlackScholesServiceLive = Layer.succeed(
   BlackScholesService,
   BlackScholesService.of({
     calculatePrice: input =>
       Effect.gen(function* () {
-        // Validate input using schema
         const validated = yield* Schema.decodeUnknown(InputsSchema)(input).pipe(
           Effect.mapError(
             err =>
@@ -126,7 +119,6 @@ export const BlackScholesServiceLive = Layer.succeed(
           ),
         )
 
-        // Make API call with timeout
         const result = yield* Effect.tryPromise({
           try: () =>
             postBlackScholes({
@@ -140,20 +132,12 @@ export const BlackScholesServiceLive = Layer.succeed(
         }).pipe(
           Effect.timeout("5 seconds"),
           Effect.flatMap(response => {
-            // Handle HTTP errors
             if (!response.data) {
-              if (response.error) {
-                return Effect.fail(
-                  new ApiError({
-                    status: 400,
-                    message: "Invalid request",
-                  }),
-                )
-              }
+              const statusFromResponse = response.response?.status
               return Effect.fail(
                 new ApiError({
-                  status: 500,
-                  message: "Unknown error",
+                  status: statusFromResponse ?? 500,
+                  message: response.error ? "Invalid request" : "Unknown error",
                 }),
               )
             }
@@ -168,7 +152,6 @@ export const BlackScholesServiceLive = Layer.succeed(
           ),
         )
 
-        // Validate response using schema
         yield* Schema.decodeUnknown(OptionPriceSchema)(result).pipe(
           Effect.mapError(
             err =>

@@ -515,6 +515,20 @@ features.
 
 ### Testing Strategy
 
+**CRITICAL: Write tests that test YOUR code, not the language**:
+
+- **NEVER** write tests that just verify TypeScript/JavaScript/Haskell
+  primitives work
+- **NEVER** test that initializing an object with fields results in an object
+  with those fields
+- **NEVER** test that type annotations work correctly
+- Tests should verify YOUR BUSINESS LOGIC, not that the compiler/runtime works
+- If a test doesn't catch a potential bug in YOUR code, it's useless
+- Example of BAD test: `expect(mockObject.field).toBe(value)` when you just
+  initialized it with that value
+- Example of GOOD test: Testing that a pricing formula returns expected values
+  for known inputs
+
 **Backend** (HSpec):
 
 - Unit tests for pricing models
