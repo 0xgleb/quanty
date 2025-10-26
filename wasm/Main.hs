@@ -1,14 +1,15 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 module Main where
 
+import BlackScholes qualified as BS
 import Data.Aeson (FromJSON, ToJSON, Value, decode, encode)
 import Data.ByteString.Lazy qualified as BL
 import Data.Text (Text)
+import Data.Text qualified as T
 import Data.Text.Encoding qualified as TE
-import GHC.Generics (Generic)
+import GHC.Wasm.Prim (JSString)
+import GHC.Wasm.Prim qualified as Wasm
 
 
 -- | Pure addition function - no IO, should have no scheduler issues
@@ -52,18 +53,23 @@ validateJson jsonStr =
         Just _ -> True
 
 
--- Note: We've proven bidirectional data passing with doubleValue (Int -> Int).
--- Proper JSON marshalling with concrete Haskell types will come in Task 5
--- when we implement BlackScholes types with proper Aeson instances.
+-- | Calculate Black-Scholes option price - FFI export for JavaScript
+foreign export javascript "calculateBlackScholes"
+  calculateBlackScholesFFI :: JSString -> IO JSString
 
--- | Test type for TypeScript generation
--- This proves aeson-typescript works before we add BlackScholes types
-data TestMessage = TestMessage
-  { message :: Text
-  , value :: Int
-  }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+
+calculateBlackScholesFFI :: JSString -> IO JSString
+calculateBlackScholesFFI jsStr = do
+  let str = Wasm.fromJSString jsStr -- JSString -> String
+  let textStr = T.pack str -- String -> Text
+  let jsonBytes = BL.fromStrict $ TE.encodeUtf8 textStr
+  case decode jsonBytes of
+    Nothing -> pure $ Wasm.toJSString "{\"error\": \"Invalid JSON input\"}"
+    Just input -> do
+      let result = BS.calculatePriceWithGreeks input
+      let resultJson = TE.decodeUtf8 $ BL.toStrict $ encode result
+      let resultStr = T.unpack resultJson -- Text -> String
+      pure $ Wasm.toJSString resultStr -- String -> JSString
 
 
 -- | Main function (required but not called in reactor mode)

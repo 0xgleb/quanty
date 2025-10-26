@@ -1,38 +1,26 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 -- \| Type generation script for aeson-typescript
 -- Generates TypeScript type definitions from Haskell ADTs
 -- Run from build.sh with: cabal run gen-types (uses Nix environment)
 
-import Data.Aeson (FromJSON, Options, ToJSON, defaultOptions)
+import BlackScholes qualified as BS
 import Data.Aeson.TypeScript.TH qualified as TS
 import Data.List (isPrefixOf)
 import Data.Proxy (Proxy (..))
-import Data.Text (Text)
-import GHC.Generics (Generic)
 import System.IO qualified as IO
-
-
--- Import the test type from Main
--- For now, we define it here to avoid module dependencies
-data TestMessage = TestMessage
-  { message :: Text
-  , value :: Int
-  }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
-
-
-$(TS.deriveTypeScript defaultOptions ''TestMessage)
 
 
 main :: IO ()
 main = do
-  let declarations = TS.getTypeScriptDeclarations (Proxy @TestMessage)
+  -- Generate types for all BlackScholes ADTs
+  let declarations =
+        TS.getTypeScriptDeclarations (Proxy @BS.OptionKind)
+          <> TS.getTypeScriptDeclarations (Proxy @BS.TimeToExpiryDays)
+          <> TS.getTypeScriptDeclarations (Proxy @BS.Inputs)
+          <> TS.getTypeScriptDeclarations (Proxy @BS.Greeks)
+          <> TS.getTypeScriptDeclarations (Proxy @BS.OptionPrice)
   let tsCode = TS.formatTSDeclarations declarations
 
   -- Add 'export' to all interfaces

@@ -81,6 +81,7 @@ change.
 - **CRITICAL: Always verify checks pass before claiming work is complete**
   - ALWAYS run `stack build --fast` and `stack test --fast` before submitting
     Haskell code for review
+  - ALWAYS run `hlint` on modified Haskell files before submitting for review
   - ALWAYS run `pnpm lint` and `pnpm format` before submitting TypeScript code
     for review
   - NEVER claim that work is complete or ready for review without running all
