@@ -15,3 +15,6 @@ wasm/test-wasm.mjs
 
 # WASM artifacts copied to frontend
 frontend/static/wasm/dist/
+
+# Cabal build directories
+dist-newstyle/

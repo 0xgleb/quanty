@@ -114,6 +114,19 @@
 				await instance_exports.helloWasm();
 				console.log('WASM test: Returned from helloWasm()');
 
+				status = 'Testing bidirectional data passing with doubleValue()...';
+
+				// Test doubleValue - demonstrates JS -> Haskell -> JS data flow
+				console.log('WASM test: About to call doubleValue(21)');
+				const doubled = await instance_exports.doubleValue(21);
+				console.log('WASM test: doubleValue(21) =', doubled);
+				logsArray.push(`doubleValue(21) = ${doubled}`);
+
+				if (doubled !== 42) {
+					console.error('ERROR: Expected 42, got', doubled);
+					throw new Error(`doubleValue test failed: expected 42, got ${doubled}`);
+				}
+
 				// Wait a moment just in case
 				await new Promise(resolve => setTimeout(resolve, 50));
 

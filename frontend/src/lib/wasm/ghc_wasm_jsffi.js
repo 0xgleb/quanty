@@ -100,7 +100,7 @@ export default __exports => {
     getJSVal: k => __ghc_wasm_jsffi_jsval_manager.getJSVal(k),
     freeJSVal: k => __ghc_wasm_jsffi_jsval_manager.freeJSVal(k),
     scheduleWork: () => setImmediate(__exports.rts_schedulerLoop),
-    ZC2ZCquantyzmwasmzm0zi1zi0zi0zminplacezmquantyzmwasmZCMainZC: async () =>
+    ZC3ZCquantyzmwasmzm0zi1zi0zi0zminplacezmquantyzmwasmZCMainZC: async () =>
       console.log("Hello from Haskell WASM!"),
     ZC0ZCghczminternalZCGHCziInternalziWasmziPrimziExportsZC: ($1, $2) =>
       $1.reject(new WebAssembly.RuntimeError($2)),
