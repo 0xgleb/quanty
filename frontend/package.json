@@ -21,7 +21,8 @@
     "@eslint/js": "^9.38.0",
     "@fontsource/fira-mono": "^5.2.7",
     "@hey-api/openapi-ts": "^0.86.3",
-    "@lucide/svelte": "^0.546.0",
+    "@internationalized/date": "^3.10.0",
+    "@lucide/svelte": "^0.544.0",
     "@neoconfetti/svelte": "^2.2.2",
     "@sveltejs/adapter-auto": "^6.1.0",
     "@sveltejs/kit": "^2.43.2",
@@ -32,6 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vitest/ui": "^4.0.3",
+    "bits-ui": "^2.14.1",
     "clsx": "^2.1.1",
     "eslint": "^9.38.0",
     "eslint-plugin-svelte": "^3.12.5",
@@ -56,6 +58,7 @@
   },
   "dependencies": {
     "@effect/schema": "^0.75.5",
-    "effect": "^3.18.4"
+    "effect": "^3.18.4",
+    "katex": "^0.16.25"
   }
 }

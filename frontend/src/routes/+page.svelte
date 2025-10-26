@@ -1,108 +1,131 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button"
-  import * as Card from "$lib/components/ui/card"
-  import { getHealth, getPlaceholder } from "$lib/api/effectClient"
-  import { createQuery, createMutation } from "$lib/query.svelte"
+  import { createMutation } from "$lib/query.svelte"
+  import {
+    BlackScholesService,
+    BlackScholesServiceLive,
+  } from "$lib/services/blackScholes"
+  import { Effect } from "effect"
+  import type { Inputs, OptionKind } from "$lib/api/generated/types.gen"
+  import { presets, type Preset } from "$lib/presets"
+  import OptionParametersForm from "$lib/components/calculator/OptionParametersForm.svelte"
+  import FormulaDisplay from "$lib/components/calculator/FormulaDisplay.svelte"
+  import ResultsDisplay from "$lib/components/calculator/ResultsDisplay.svelte"
 
-  const healthQuery = createQuery(getHealth)
-  const placeholderMutation = createMutation(() => getPlaceholder)
+  type FormData = {
+    spot: number | undefined
+    strike: number | undefined
+    timeToExpiry: { days: number | undefined }
+    volatility: number | undefined
+    riskFreeRate: number | undefined
+  }
 
-  const healthVersion = $derived(healthQuery.data?.version ?? null)
-  const backendAvailable = $derived(healthQuery.isSuccess)
+  let formData = $state<FormData>({
+    spot: undefined,
+    strike: undefined,
+    timeToExpiry: { days: undefined },
+    volatility: undefined,
+    riskFreeRate: undefined,
+  })
+
+  let optionKind = $state<OptionKind>("Call")
+
+  const calculateMutation = createMutation(() =>
+    Effect.gen(function* () {
+      if (
+        formData.spot === undefined ||
+        formData.strike === undefined ||
+        formData.timeToExpiry.days === undefined ||
+        formData.volatility === undefined ||
+        formData.riskFreeRate === undefined
+      ) {
+        return yield* Effect.fail(
+          new Error("All fields must be filled"),
+        )
+      }
+
+      const inputs: Inputs = {
+        spot: formData.spot,
+        strike: formData.strike,
+        timeToExpiry: { days: formData.timeToExpiry.days },
+        volatility: formData.volatility,
+        riskFreeRate: formData.riskFreeRate,
+        kind: optionKind,
+      }
+
+      const service = yield* BlackScholesService
+      return yield* service.calculatePrice(inputs)
+    }).pipe(Effect.provide(BlackScholesServiceLive)),
+  )
+
+  const handleSubmit = (event: Event) => {
+    event.preventDefault()
+    calculateMutation.mutate(undefined)
+  }
+
+  const handleReset = () => {
+    formData = {
+      spot: undefined,
+      strike: undefined,
+      timeToExpiry: { days: undefined },
+      volatility: undefined,
+      riskFreeRate: undefined,
+    }
+    optionKind = "Call"
+    calculateMutation.reset()
+  }
+
+  const loadPreset = (preset: Preset) => {
+    formData = {
+      spot: preset.values.spot,
+      strike: preset.values.strike,
+      timeToExpiry: { days: preset.values.timeToExpiry.days },
+      volatility: preset.values.volatility,
+      riskFreeRate: preset.values.riskFreeRate,
+    }
+    optionKind = preset.values.kind
+    calculateMutation.mutate(undefined)
+  }
 </script>
 
 <svelte:head>
-  <title>Quanty - Options Pricing Calculator</title>
+  <title>Black-Scholes Calculator - Quanty</title>
   <meta
     name="description"
-    content="Cryptocurrency options pricing and financial derivatives calculator"
+    content="Calculate option prices using the Black-Scholes model for cryptocurrency derivatives"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
+    integrity="sha384-ZlsGkaTGe72LcQRdHcP5S1MYvfltZaG/vkBXb5WhMPAzP1k8vCPOm8h9Pj1aIkC"
+    crossorigin="anonymous"
   />
 </svelte:head>
 
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-  <div class="mb-8">
-    <h1 class="text-4xl font-bold mb-2">Quanty</h1>
-    <p class="text-muted-foreground text-lg">
-      Options Pricing Calculator for Cryptocurrency Derivatives
+<div class="container mx-auto px-6 py-6">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1">Black-Scholes Calculator</h1>
+    <p class="text-muted-foreground text-sm">
+      Price European options using the Black-Scholes model
     </p>
   </div>
 
-  <div class="mb-6 flex items-center gap-2">
-    <div
-      class="w-3 h-3 rounded-full {healthQuery.isSuccess
-        ? 'bg-green-500'
-        : healthQuery.isError
-          ? 'bg-red-500'
-          : 'bg-yellow-500 animate-pulse'}"
-    ></div>
-    <span class="text-sm text-muted-foreground">
-      {#if healthQuery.isPending}
-        Checking backend status...
-      {:else if healthQuery.isSuccess}
-        Backend connected (v{healthVersion || "unknown"})
-      {:else}
-        Backend unavailable
-      {/if}
-    </span>
-  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <OptionParametersForm
+        bind:formData
+        bind:optionKind
+        {calculateMutation}
+        {presets}
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        onLoadPreset={loadPreset}
+      />
 
-  <div class="space-y-6">
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Test API Connection</Card.Title>
-        <Card.Description>
-          Fetch placeholder data from the backend to verify end-to-end
-          connectivity
-        </Card.Description>
-      </Card.Header>
-      <Card.Content class="space-y-4">
-        <Button
-          onclick={() => placeholderMutation.mutate()}
-          disabled={placeholderMutation.isPending || !backendAvailable}
-        >
-          {#if placeholderMutation.isPending}
-            Loading...
-          {:else}
-            Fetch Placeholder Data
-          {/if}
-        </Button>
+      <div class="space-y-6">
+        <FormulaDisplay />
 
-        {#if placeholderMutation.isError}
-          <div
-            class="p-4 rounded-lg bg-destructive/10 text-destructive text-sm"
-          >
-            Error: {placeholderMutation.error?.message ?? "Failed to fetch data"}
-          </div>
+        {#if calculateMutation.isSuccess && calculateMutation.data}
+          <ResultsDisplay data={calculateMutation.data} {optionKind} />
         {/if}
-
-        {#if placeholderMutation.isSuccess && placeholderMutation.data}
-          <div class="p-4 rounded-lg bg-muted space-y-2">
-            <div class="font-medium">Response:</div>
-            <div class="text-sm">
-              <div><strong>Message:</strong> {placeholderMutation.data.message}</div>
-              <div><strong>Timestamp:</strong> {placeholderMutation.data.timestamp}</div>
-            </div>
-          </div>
-        {/if}
-      </Card.Content>
-    </Card.Root>
-
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Getting Started</Card.Title>
-      </Card.Header>
-      <Card.Content>
-        <p class="text-sm text-muted-foreground mb-4">
-          This is a placeholder page demonstrating the connection between the
-          Haskell backend and SvelteKit frontend.
-        </p>
-        <ul class="text-sm text-muted-foreground space-y-2 list-disc list-inside">
-          <li>Backend API running on http://localhost:8080</li>
-          <li>Frontend dev server running on http://localhost:5173</li>
-          <li>API client auto-generated from OpenAPI specification</li>
-          <li>Full type safety from backend to frontend</li>
-        </ul>
-      </Card.Content>
-    </Card.Root>
+      </div>
   </div>
 </div>

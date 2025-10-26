@@ -7,12 +7,14 @@ module Api (
   apiOpenApi,
 ) where
 
+import BlackScholes qualified
 import Control.Lens ((.~), (?~))
 import Data.Aeson qualified as Aeson
 import Data.OpenApi (ToSchema)
 import Data.OpenApi qualified as OpenApi
 import Data.Time.Clock qualified as Clock
 import Network.Wai qualified as Wai
+import Option (getTimeToExpiryDays)
 import Protolude
 import Servant (type (:-), type (:>))
 import Servant qualified
@@ -31,6 +33,11 @@ data API mode = API
       :: mode
         :- "placeholder"
           :> Servant.Get '[Servant.JSON] PlaceholderResponse
+  , blackScholes
+      :: mode
+        :- "black-scholes"
+          :> Servant.ReqBody '[Servant.JSON] BlackScholes.Inputs
+          :> Servant.Post '[Servant.JSON] BlackScholes.OptionPrice
   }
   deriving stock (Generic)
 
@@ -70,6 +77,55 @@ server = API {..}
           { message = "Hello from Quanty API"
           , timestamp = show now
           }
+
+    blackScholes :: BlackScholes.Inputs -> Servant.Handler BlackScholes.OptionPrice
+    blackScholes input = do
+      when (input.spot <= 0) $
+        Servant.throwError
+          Servant.err400
+            { Servant.errBody = "Spot price must be positive"
+            }
+
+      when (input.strike <= 0) $
+        Servant.throwError
+          Servant.err400
+            { Servant.errBody = "Strike price must be positive"
+            }
+
+      when (getTimeToExpiryDays input.timeToExpiry <= 0) $
+        Servant.throwError
+          Servant.err400
+            { Servant.errBody = "Time to expiry must be positive"
+            }
+
+      when (input.volatility <= 0) $
+        Servant.throwError
+          Servant.err400
+            { Servant.errBody = "Volatility must be positive"
+            }
+
+      when (input.riskFreeRate < 0) $
+        Servant.throwError
+          Servant.err400
+            { Servant.errBody = "Risk-free rate must be non-negative"
+            }
+
+      unless
+        ( isFinite input.spot
+            && isFinite input.strike
+            && isFinite (getTimeToExpiryDays input.timeToExpiry)
+            && isFinite input.volatility
+            && isFinite input.riskFreeRate
+        )
+        $ Servant.throwError
+          Servant.err400
+            { Servant.errBody = "All input values must be finite (not NaN or Infinity)"
+            }
+
+      pure $ BlackScholes.calculatePriceWithGreeks input
+
+    isFinite :: Double -> Bool
+    isFinite x = not $ isNaN x || isInfinite x
 
 
 app :: Wai.Application

@@ -36,7 +36,7 @@ export const createQuery = <TData, TError>(
     state = { status: "pending" }
     currentFiber = Effect.runFork(effect)
 
-    Fiber.await(currentFiber).then(exit => {
+    Effect.runPromise(Fiber.await(currentFiber)).then(exit => {
       if (Exit.isSuccess(exit)) {
         state = { status: "success", data: exit.value }
       } else if (Exit.isFailure(exit) && !Cause.isInterrupted(exit.cause)) {
@@ -118,7 +118,7 @@ export const createMutation = <TInput, TData, TError>(
     state = { status: "pending" }
     currentFiber = Effect.runFork(effectFn(input as TInput))
 
-    Fiber.await(currentFiber).then(exit => {
+    Effect.runPromise(Fiber.await(currentFiber)).then(exit => {
       if (Exit.isSuccess(exit)) {
         state = { status: "success", data: exit.value }
       } else if (Exit.isFailure(exit) && !Cause.isInterrupted(exit.cause)) {

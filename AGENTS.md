@@ -95,6 +95,10 @@ change.
 ### Before creating a PR
 
 - **CRITICAL**: Delete PLAN.md before submitting changes for review
+  - **A PR containing PLAN.md is NOT ready for review**
+  - PLAN.md must be removed from the working tree AND from git history (if
+    accidentally committed)
+  - Use `git rm PLAN.md` to remove it properly
 - PLAN.md is a transient development file that should ONLY exist on development
   branches
 - PLAN.md should NEVER appear in pull requests or be merged to main/master
@@ -239,6 +243,27 @@ guidelines.
 - No mutable state
 - Explicit error handling (no `unwrap`)
 - Use `Protolude` for modern Haskell
+
+**Naming Conventions**:
+
+- **CRITICAL**: Use types to convey information, not verbose variable names
+- Avoid meaningless single-letter names like `d`, `s`, `t`, `x` in business
+  logic
+- **Bad examples**:
+  - `spotPrice :: Double` - information redundantly encoded in name
+  - `daysValue :: Double` - information redundantly encoded in name
+  - `x :: Price` - name conveys nothing
+  - `d :: Days` - name conveys nothing (unless standard notation)
+- **Good examples**:
+  - `spot :: Price` - type tells you what it is, name is concise
+  - `days :: Days` - type tells you what it is, name is concise
+  - `err :: SomeError` - standard abbreviation, type is descriptive
+  - `tmp :: FilePath` - standard abbreviation, type is descriptive
+  - `result :: OptionPrice` - type is descriptive
+- Exception: Standard mathematical notation in well-documented formulas (e.g.,
+  `d1`, `d2` in Black-Scholes are acceptable when extensively documented)
+- The Haskell philosophy: leverage the type system to encode meaning, keep names
+  concise but not cryptic
 
 **Import Style**:
 
@@ -489,6 +514,20 @@ features.
   expressed clearly through code structure, naming, or types
 
 ### Testing Strategy
+
+**CRITICAL: Write tests that test YOUR code, not the language**:
+
+- **NEVER** write tests that just verify TypeScript/JavaScript/Haskell
+  primitives work
+- **NEVER** test that initializing an object with fields results in an object
+  with those fields
+- **NEVER** test that type annotations work correctly
+- Tests should verify YOUR BUSINESS LOGIC, not that the compiler/runtime works
+- If a test doesn't catch a potential bug in YOUR code, it's useless
+- Example of BAD test: `expect(mockObject.field).toBe(value)` when you just
+  initialized it with that value
+- Example of GOOD test: Testing that a pricing formula returns expected values
+  for known inputs
 
 **Backend** (HSpec):
 

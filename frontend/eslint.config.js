@@ -48,9 +48,15 @@ export default [
     },
     plugins: {
       svelte,
+      "@typescript-eslint": tseslint,
     },
     rules: {
       ...svelte.configs.recommended.rules,
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
     },
   },
   {

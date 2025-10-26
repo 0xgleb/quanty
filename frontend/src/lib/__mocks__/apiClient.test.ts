@@ -3,7 +3,7 @@ import {
   createMockHealthResponse,
   createMockPlaceholderResponse,
   createMockApiResponse,
-} from "$lib/__mocks__/apiClient"
+} from "./apiClient"
 
 describe("API Client Mocks", () => {
   describe("createMockHealthResponse", () => {
