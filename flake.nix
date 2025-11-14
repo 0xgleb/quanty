@@ -24,7 +24,11 @@
           nixfmt-classic.enable = true;
 
           # Haskell
-          fourmolu.enable = true;
+          hpack.enable = true;
+          fourmolu = {
+            enable = true;
+            after = [ "hpack" ];
+          };
           hlint.enable = true;
 
           # TypeScript
@@ -47,6 +51,7 @@
               haskell-language-server
               fourmolu
               hlint
+              hpack
             ];
 
             languages = {
