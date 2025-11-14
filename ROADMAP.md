@@ -37,19 +37,12 @@ structure.
       TypeScript, and Tailwind CSS
       ([#2](https://github.com/0xgleb/quanty/issues/2),
       [PR #9](https://github.com/0xgleb/quanty/pull/9))
-- [x] Initialize SvelteKit frontend with shadcn-svelte component library,
-      TypeScript, and Tailwind CSS (duplicate of #2)
-      ([#4](https://github.com/0xgleb/quanty/issues/4),
-      [PR #9](https://github.com/0xgleb/quanty/pull/9))
 - [x] Install Effect ecosystem packages (effect, @effect/schema) for type-safe
       error handling and validation
 - [x] Setup Effect runtime configuration with layers for dependency injection
 - [ ] Setup GitHub Actions CI pipeline with Haskell build/test, frontend
       build/lint, and build caching
       ([#3](https://github.com/0xgleb/quanty/issues/3))
-- [ ] Setup GitHub Actions CI pipeline with Haskell build/test, frontend
-      build/lint, and build caching (duplicate of #3)
-      ([#5](https://github.com/0xgleb/quanty/issues/5))
 
 ---
 
