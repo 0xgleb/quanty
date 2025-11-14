@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  nix-checks:
+    name: Nix Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Check Nix flake
+        run: nix flake check --impure
+
+      - name: Check Nix formatting
+        run: nix develop --impure --command nixfmt --check flake.nix
+
+  backend:
+    name: Backend (Haskell)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Cache Stack artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml', 'package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      - name: Check Haskell formatting
+        run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec fourmolu --mode check {} +'
+
+      - name: Lint Haskell code
+        run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec hlint {} +'
+
+      - name: Build Haskell project
+        run: nix develop --impure --command stack build --fast
+
+      - name: Run Haskell tests
+        run: nix develop --impure --command stack test --fast
+
+  frontend:
+    name: Frontend (TypeScript/Svelte)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(nix develop --impure --command pnpm store path)" >> $GITHUB_ENV
+        working-directory: .
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: nix develop --impure --command pnpm install
+        working-directory: .
+
+      - name: Check TypeScript formatting
+        run: nix develop --impure --command pnpm format --check
+        working-directory: .
+
+      - name: Lint TypeScript code
+        run: nix develop --impure --command pnpm lint
+        working-directory: .
+
+      - name: Type check
+        run: nix develop --impure --command pnpm check
+        working-directory: .
+
+      - name: Run tests
+        run: nix develop --impure --command pnpm test:run
+        working-directory: .
+
+      - name: Build frontend
+        run: nix develop --impure --command pnpm build
+        working-directory: .

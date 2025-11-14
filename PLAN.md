@@ -11,36 +11,36 @@ Create `.github/workflows/ci.yml` that:
 - Has separate jobs for better parallelization and clear failure reporting
 
 **Subtasks:**
-- [ ] Set up Nix with cachix/install-nix-action
-- [ ] Configure Nix cache for faster builds
-- [ ] Create job for Nix-level checks (nix flake check)
-- [ ] Create job for backend checks (Haskell)
-- [ ] Create job for frontend checks (TypeScript/Svelte)
+- [x] Set up Nix with cachix/install-nix-action
+- [x] Configure Nix cache for faster builds
+- [x] Create job for Nix-level checks (nix flake check)
+- [x] Create job for backend checks (Haskell)
+- [x] Create job for frontend checks (TypeScript/Svelte)
 
 ## Task 2. Backend CI checks
 
 Configure backend job to run all Haskell checks:
-- [ ] Format check with fourmolu
-- [ ] Lint with hlint
-- [ ] Build with stack build --fast
-- [ ] Test with stack test --fast
+- [x] Format check with fourmolu
+- [x] Lint with hlint
+- [x] Build with stack build --fast
+- [x] Test with stack test --fast
 
 ## Task 3. Frontend CI checks
 
 Configure frontend job to run all TypeScript/Svelte checks:
-- [ ] Install dependencies with pnpm
-- [ ] Lint with eslint
-- [ ] Format check with prettier
-- [ ] Type check with svelte-check
-- [ ] Run tests with vitest
-- [ ] Build check
+- [x] Install dependencies with pnpm
+- [x] Lint with eslint
+- [x] Format check with prettier
+- [x] Type check with svelte-check
+- [x] Run tests with vitest
+- [x] Build check
 
 ## Task 4. Nix and misc checks
 
 Configure checks for Nix files and shell scripts:
-- [ ] Format check with nixfmt
-- [ ] Nix flake check
-- [ ] Shellcheck for any shell scripts
+- [x] Format check with nixfmt
+- [x] Nix flake check
+- [x] Shellcheck for any shell scripts
 
 ## Design Decisions
 
