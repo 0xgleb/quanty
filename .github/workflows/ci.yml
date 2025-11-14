@@ -25,6 +25,19 @@ jobs:
         with:
           name: devenv
 
+      - name: Cache Stack artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml', 'package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      - name: Generate cabal file for pre-commit hooks
+        run: nix develop --impure --command stack build --dry-run
+
       - name: Check Nix flake
         run: nix flake check --impure
 
@@ -61,7 +74,7 @@ jobs:
             ${{ runner.os }}-stack-
 
       - name: Generate cabal file
-        run: nix develop --impure --command hpack
+        run: nix develop --impure --command stack build --dry-run
 
       - name: Check Haskell formatting
         run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec fourmolu --mode check {} +'
