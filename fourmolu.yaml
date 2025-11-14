@@ -28,3 +28,19 @@ unicode: never
 respectful: false
 # | list of strings (**`[]`**)                            | See the "Language extensions, dependencies, and fixities" section below
 fixities: []
+# Language extensions (must match package.yaml default-extensions)
+ghc-opt:
+  - -XApplicativeDo
+  - -XBlockArguments
+  - -XDeriveAnyClass
+  - -XDerivingVia
+  - -XLinearTypes
+  - -XNoImplicitPrelude
+  - -XOverloadedStrings
+  - -XQuasiQuotes
+  - -XRecordWildCards
+  - -XTypeFamilyDependencies
+  - -XViewPatterns
+  - -XDuplicateRecordFields
+  - -XNoFieldSelectors
+  - -XOverloadedRecordDot
