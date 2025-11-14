@@ -24,7 +24,7 @@ structure.
 - [x] Haskell project structure (Stack + package.yaml)
 - [x] Pre-commit hooks (fourmolu, hlint, prettier, eslint)
 - [x] Initial documentation (README, SPEC, ROADMAP, CLAUDE)
-- [ ] SvelteKit frontend setup
+- [x] SvelteKit frontend setup
 - [ ] Basic CI/CD pipeline
 
 ### Tasks
@@ -33,13 +33,14 @@ structure.
 - [x] Configure Stack to use Nix system-ghc
 - [x] Setup pre-commit hooks for code quality
 - [x] Create project documentation
-- [ ] [#2](https://github.com/0xgleb/quanty/issues/2) - Initialize frontend with
+- [x] [#2](https://github.com/0xgleb/quanty/issues/2) - Initialize frontend with
       shadcn-svelte
-- [ ] Install Effect ecosystem packages (effect, @effect/schema,
-      @effect/platform)
-- [ ] Setup Effect runtime configuration
-- [ ] [#3](https://github.com/0xgleb/quanty/issues/3) - Setup GitHub Actions CI
-      pipeline
+  - **PR:** [#9](https://github.com/0xgleb/quanty/pull/9)
+- [x] Install Effect ecosystem packages (effect, @effect/schema)
+- [x] Setup Effect runtime configuration
+- [ ] [#3](https://github.com/0xgleb/quanty/issues/3),
+      [#5](https://github.com/0xgleb/quanty/issues/5) - Setup GitHub Actions CI
+      pipeline (duplicate issues)
 
 ---
 
@@ -58,8 +59,10 @@ Minimal viable backend with Black-Scholes pricing endpoint.
 
 - [x] [#6](https://github.com/0xgleb/quanty/issues/6) - Implement Black-Scholes
       pricing in `src/BlackScholes/`
+  - **PR:** [#11](https://github.com/0xgleb/quanty/pull/11)
 - [x] [#7](https://github.com/0xgleb/quanty/issues/7) - Create basic Servant
       server
+  - **PR:** [#9](https://github.com/0xgleb/quanty/pull/9)
 
 ---
 
@@ -89,6 +92,7 @@ Minimal viable frontend with option pricing calculator.
 
 - [x] [#8](https://github.com/0xgleb/quanty/issues/8) - Build basic calculator
       UI
+  - **PR:** [#11](https://github.com/0xgleb/quanty/pull/11)
 - [x] Integrate Effect API client in Svelte components
 - [x] Add Schema validation for user inputs
 - [x] Handle errors with Effect.catchAll and Effect.catchTag
@@ -197,8 +201,8 @@ Complete market data feature in a single module containing:
 - [ ] Show data staleness warnings
 - [ ] Cache market data with Effect
 - [ ] Handle offline scenarios with Effect fallbacks
-- [ ] [#10](https://github.com/0xgleb/quanty/issues/10) - Add query refetch on
-      window focus/network reconnect
+- [ ] [#10](https://github.com/0xgleb/quanty/issues/10) - Add automatic query
+      refetch on window focus and network reconnect
 
 ---
 
@@ -464,7 +468,7 @@ Prepare for production deployment with monitoring, logging, and documentation.
 
 ## Experimental: Serverless Architecture with WASM
 
-**Status:** Research phase
+**Status:** Research phase (Draft PR [#13](https://github.com/0xgleb/quanty/pull/13) in progress)
 
 Explore migrating to a serverless architecture using GHC's WebAssembly backend
 to eliminate backend hosting requirements.
@@ -488,6 +492,8 @@ Hybrid approach: Svelte/TypeScript for UI/UX, Haskell WASM for numerical
 computation.
 
 ### Tasks
+
+**Research**:
 
 - [ ] [#12](https://github.com/0xgleb/quanty/issues/12) - Research and document
       WASM feasibility
