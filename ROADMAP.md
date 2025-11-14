@@ -33,14 +33,16 @@ structure.
 - [x] Configure Stack to use Nix system-ghc
 - [x] Setup pre-commit hooks for code quality
 - [x] Create project documentation
-- [x] [#2](https://github.com/0xgleb/quanty/issues/2) - Initialize frontend with
-      shadcn-svelte
-  - **PR:** [#9](https://github.com/0xgleb/quanty/pull/9)
-- [x] Install Effect ecosystem packages (effect, @effect/schema)
-- [x] Setup Effect runtime configuration
-- [ ] [#3](https://github.com/0xgleb/quanty/issues/3),
-      [#5](https://github.com/0xgleb/quanty/issues/5) - Setup GitHub Actions CI
-      pipeline (duplicate issues)
+- [x] Initialize SvelteKit frontend with shadcn-svelte component library,
+      TypeScript, and Tailwind CSS ([#2](https://github.com/0xgleb/quanty/issues/2),
+      [PR #9](https://github.com/0xgleb/quanty/pull/9))
+- [x] Install Effect ecosystem packages (effect, @effect/schema) for type-safe
+      error handling and validation
+- [x] Setup Effect runtime configuration with layers for dependency injection
+- [ ] Setup GitHub Actions CI pipeline with Haskell build/test, frontend
+      build/lint, and build caching
+      ([#3](https://github.com/0xgleb/quanty/issues/3),
+      [#5](https://github.com/0xgleb/quanty/issues/5))
 
 ---
 
@@ -57,12 +59,14 @@ Minimal viable backend with Black-Scholes pricing endpoint.
 
 ### Tasks
 
-- [x] [#6](https://github.com/0xgleb/quanty/issues/6) - Implement Black-Scholes
-      pricing in `src/BlackScholes/`
-  - **PR:** [#11](https://github.com/0xgleb/quanty/pull/11)
-- [x] [#7](https://github.com/0xgleb/quanty/issues/7) - Create basic Servant
-      server
-  - **PR:** [#9](https://github.com/0xgleb/quanty/pull/9)
+- [x] Implement Black-Scholes pricing model in `src/BlackScholes/` with types,
+      pricing logic, Greeks calculations, and comprehensive test suite
+      ([#6](https://github.com/0xgleb/quanty/issues/6),
+      [PR #11](https://github.com/0xgleb/quanty/pull/11))
+- [x] Create Servant REST API server with health check endpoint, Black-Scholes
+      pricing endpoint, and OpenAPI spec generation
+      ([#7](https://github.com/0xgleb/quanty/issues/7),
+      [PR #9](https://github.com/0xgleb/quanty/pull/9))
 
 ---
 
@@ -90,10 +94,12 @@ Minimal viable frontend with option pricing calculator.
 
 **Calculator UI with Effect Integration**:
 
-- [x] [#8](https://github.com/0xgleb/quanty/issues/8) - Build basic calculator
-      UI
-  - **PR:** [#11](https://github.com/0xgleb/quanty/pull/11)
-- [x] Integrate Effect API client in Svelte components
+- [x] Build interactive calculator UI with parameter input forms, results
+      display, preset buttons (ATM/OTM/ITM), and formula visualization using
+      KaTeX ([#8](https://github.com/0xgleb/quanty/issues/8),
+      [PR #11](https://github.com/0xgleb/quanty/pull/11))
+- [x] Integrate Effect-based API client in Svelte components with reactive
+      query/mutation helpers
 - [x] Add Schema validation for user inputs
 - [x] Handle errors with Effect.catchAll and Effect.catchTag
 - [x] Display validation errors from Schema
@@ -201,8 +207,9 @@ Complete market data feature in a single module containing:
 - [ ] Show data staleness warnings
 - [ ] Cache market data with Effect
 - [ ] Handle offline scenarios with Effect fallbacks
-- [ ] [#10](https://github.com/0xgleb/quanty/issues/10) - Add automatic query
-      refetch on window focus and network reconnect
+- [ ] Add automatic query refetch when user returns to browser tab (window
+      focus) or network reconnects, with debouncing to prevent excessive
+      requests ([#10](https://github.com/0xgleb/quanty/issues/10))
 
 ---
 
@@ -468,7 +475,9 @@ Prepare for production deployment with monitoring, logging, and documentation.
 
 ## Experimental: Serverless Architecture with WASM
 
-**Status:** Research phase (Draft PR [#13](https://github.com/0xgleb/quanty/pull/13) in progress)
+**Status:** Research phase - exploring feasibility of compiling Haskell pricing
+models to WebAssembly for client-side execution (Draft implementation in
+[PR #13](https://github.com/0xgleb/quanty/pull/13))
 
 Explore migrating to a serverless architecture using GHC's WebAssembly backend
 to eliminate backend hosting requirements.
@@ -495,8 +504,10 @@ computation.
 
 **Research**:
 
-- [ ] [#12](https://github.com/0xgleb/quanty/issues/12) - Research and document
-      WASM feasibility
+- [ ] Research GHC WASM backend capabilities, bundle size implications (~2MB
+      estimated), TypeScript FFI binding strategies, and document feasibility
+      with implementation plan, risk assessment, and success criteria
+      ([#12](https://github.com/0xgleb/quanty/issues/12))
 
 **Phase 1: Proof of Concept**
 
