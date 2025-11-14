@@ -60,6 +60,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-
 
+      - name: Generate cabal file
+        run: nix develop --impure --command hpack
+
       - name: Check Haskell formatting
         run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec fourmolu --mode check {} +'
 
@@ -113,7 +116,7 @@ jobs:
         working-directory: .
 
       - name: Check TypeScript formatting
-        run: nix develop --impure --command pnpm format --check
+        run: nix develop --impure --command bash -c 'cd frontend && prettier --check .'
         working-directory: .
 
       - name: Lint TypeScript code
