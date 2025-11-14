@@ -34,7 +34,9 @@ structure.
 - [x] Setup pre-commit hooks for code quality
 - [x] Create project documentation
 - [x] Initialize SvelteKit frontend with shadcn-svelte component library,
-      TypeScript, and Tailwind CSS ([#2](https://github.com/0xgleb/quanty/issues/2),
+      TypeScript, and Tailwind CSS
+      ([#2](https://github.com/0xgleb/quanty/issues/2),
+      [#4](https://github.com/0xgleb/quanty/issues/4),
       [PR #9](https://github.com/0xgleb/quanty/pull/9))
 - [x] Install Effect ecosystem packages (effect, @effect/schema) for type-safe
       error handling and validation
@@ -508,6 +510,10 @@ computation.
       estimated), TypeScript FFI binding strategies, and document feasibility
       with implementation plan, risk assessment, and success criteria
       ([#12](https://github.com/0xgleb/quanty/issues/12))
+- [ ] Implement proof-of-concept WASM backend with minimal Black-Scholes module,
+      Nix flake setup with ghc-wasm-meta, WASM compilation, browser integration,
+      and performance benchmarking (Draft
+      [PR #13](https://github.com/0xgleb/quanty/pull/13))
 
 **Phase 1: Proof of Concept**
 
