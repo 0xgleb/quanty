@@ -19,7 +19,7 @@
     isPending: boolean
     isError: boolean
     error: Error | undefined
-    mutate: () => void
+    mutate: (input: unknown) => void
     reset: () => void
   }
 
