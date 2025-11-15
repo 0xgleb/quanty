@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getErrorMessage, NetworkError, ValidationError } from "./blackScholes"
+import { getErrorMessage, WASMLoadError, WASMCalculationError } from "./wasm"
 
 describe("getErrorMessage", () => {
   it("returns generic error message for null", () => {
@@ -18,40 +18,40 @@ describe("getErrorMessage", () => {
     })
   })
 
-  it("returns calculation error for generic Error", () => {
+  it("returns WASM error for generic Error", () => {
     const error = new Error("Something went wrong")
     const result = getErrorMessage(error)
     expect(result).toEqual({
-      title: "Calculation Error",
+      title: "WASM Error",
       message: "Something went wrong",
     })
   })
 
-  it("returns WASM loading error for NetworkError", () => {
-    const error = new NetworkError({ cause: "WASM fetch failed" })
+  it("returns loading error for WASMLoadError", () => {
+    const error = new WASMLoadError({ cause: "Failed to fetch" })
     const result = getErrorMessage(error)
     expect(result).toEqual({
       title: "WASM Loading Error",
       message:
-        "Failed to load calculation module. Please refresh the page and try again.",
+        "Failed to load WASM module. Please refresh the page and try again.",
     })
   })
 
-  it("returns validation error for ValidationError", () => {
-    const error = new ValidationError({ message: "Invalid input" })
+  it("returns calculation error for WASMCalculationError", () => {
+    const error = new WASMCalculationError({ message: "Invalid input" })
     const result = getErrorMessage(error)
     expect(result).toEqual({
-      title: "Validation Error",
+      title: "Calculation Error",
       message: "Invalid input",
     })
   })
 
-  it("returns validation error with fallback message when message is empty", () => {
-    const error = new ValidationError({ message: "" })
+  it("returns calculation error with fallback message when message is empty", () => {
+    const error = new WASMCalculationError({ message: "" })
     const result = getErrorMessage(error)
     expect(result).toEqual({
-      title: "Validation Error",
-      message: "Invalid input provided",
+      title: "Calculation Error",
+      message: "Failed to calculate option price",
     })
   })
 })

@@ -4,3 +4,22 @@
 *.cabal
 .pre-commit-config.yaml
 openapi.json
+
+# WASM build artifacts
+wasm/dist/
+wasm/dist-wasm/
+wasm/dist-host/
+wasm/.cabal-sandbox/
+wasm/cabal.project.local
+wasm/cabal.project.local~
+wasm/cabal.project.local.tmp
+wasm/test-wasm.mjs
+
+# WASM artifacts copied to frontend
+frontend/static/wasm/dist/
+
+# Generated TypeScript types from Haskell
+frontend/src/lib/wasm/types.ts
+
+# Cabal build directories
+dist-newstyle/

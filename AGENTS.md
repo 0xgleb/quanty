@@ -81,6 +81,7 @@ change.
 - **CRITICAL: Always verify checks pass before claiming work is complete**
   - ALWAYS run `stack build --fast` and `stack test --fast` before submitting
     Haskell code for review
+  - ALWAYS run `hlint` on modified Haskell files before submitting for review
   - ALWAYS run `pnpm lint` and `pnpm format` before submitting TypeScript code
     for review
   - NEVER claim that work is complete or ready for review without running all
@@ -157,6 +158,12 @@ loops:
 - `stack test --fast` - Run tests without optimizations
 - Use optimized builds only for production or benchmarking
 
+**Build Responsibility**:
+
+- **User runs build** when dependencies or versions change (monitors download
+  progress)
+- **AI can run build** for code-only changes (quick, no downloads)
+
 ### Frontend (TypeScript/Svelte)
 
 ```bash
@@ -180,6 +187,14 @@ pnpm lint
 # Format
 pnpm format
 ```
+
+**Command Execution Responsibility**:
+
+- **User runs** `pnpm install` when dependencies change (heavy lifting -
+  monitors download progress)
+- **AI can run** `pnpm build`, `pnpm lint`, `pnpm format`, `pnpm test` for
+  code-only changes (quick, no downloads)
+- **User runs** indefinite commands like `pnpm dev` (long-running dev servers)
 
 ## Project Structure
 

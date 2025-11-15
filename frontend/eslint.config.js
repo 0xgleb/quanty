@@ -99,6 +99,8 @@ export default [
       "*.config.js",
       "*.config.ts",
       "src/lib/api/generated/**",
+      "src/lib/wasm/ghc_wasm_jsffi.js",
+      "static/wasm/**",
       "test-setup.ts",
     ],
   },
