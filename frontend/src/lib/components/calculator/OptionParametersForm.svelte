@@ -18,7 +18,7 @@
   type CalculateMutation = {
     isPending: boolean
     isError: boolean
-    error: Error | null
+    error: Error | undefined
     mutate: () => void
     reset: () => void
   }
