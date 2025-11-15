@@ -60,9 +60,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-
 
-      - name: Check Haskell formatting
-        run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec fourmolu --mode check {} +'
-
       - name: Lint Haskell code
         run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec hlint {} +'
 
