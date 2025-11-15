@@ -72,9 +72,6 @@ jobs:
   frontend:
     name: Frontend (TypeScript/Svelte)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -105,19 +102,19 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: nix develop .. --impure --command pnpm install
+        run: nix develop .. --impure --command bash -c 'cd frontend && pnpm install'
 
       - name: Check TypeScript formatting
-        run: nix develop .. --impure --command prettier --check .
+        run: nix develop .. --impure --command bash -c 'cd frontend && prettier --check .'
 
       - name: Lint TypeScript code
-        run: nix develop .. --impure --command pnpm lint
+        run: nix develop .. --impure --command bash -c 'cd frontend && pnpm lint'
 
       - name: Type check
-        run: nix develop .. --impure --command pnpm check
+        run: nix develop .. --impure --command bash -c 'cd frontend && pnpm check'
 
       - name: Run tests
-        run: nix develop .. --impure --command pnpm test:run
+        run: nix develop .. --impure --command bash -c 'cd frontend && pnpm test:run'
 
       - name: Build frontend
-        run: nix develop .. --impure --command pnpm build
+        run: nix develop .. --impure --command bash -c 'cd frontend && pnpm build'
