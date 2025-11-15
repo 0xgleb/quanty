@@ -105,19 +105,19 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: nix develop --impure --command bash -c 'cd frontend && pnpm install'
+        run: nix develop .. --impure --command pnpm install
 
       - name: Check TypeScript formatting
-        run: nix develop --impure --command bash -c 'cd frontend && prettier --check .'
+        run: nix develop .. --impure --command prettier --check .
 
       - name: Lint TypeScript code
-        run: nix develop --impure --command bash -c 'cd frontend && pnpm lint'
+        run: nix develop .. --impure --command pnpm lint
 
       - name: Type check
-        run: nix develop --impure --command bash -c 'cd frontend && pnpm check'
+        run: nix develop .. --impure --command pnpm check
 
       - name: Run tests
-        run: nix develop --impure --command bash -c 'cd frontend && pnpm test:run'
+        run: nix develop .. --impure --command pnpm test:run
 
       - name: Build frontend
-        run: nix develop --impure --command bash -c 'cd frontend && pnpm build'
+        run: nix develop .. --impure --command pnpm build
