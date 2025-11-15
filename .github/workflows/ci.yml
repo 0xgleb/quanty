@@ -95,7 +95,6 @@ jobs:
         shell: bash
         run: |
           echo "STORE_PATH=$(nix develop --impure --command pnpm store path)" >> $GITHUB_ENV
-        working-directory: .
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -107,24 +106,18 @@ jobs:
 
       - name: Install dependencies
         run: nix develop --impure --command pnpm install
-        working-directory: .
 
       - name: Check TypeScript formatting
-        run: nix develop --impure --command bash -c 'cd frontend && prettier --check .'
-        working-directory: .
+        run: nix develop --impure --command prettier --check .
 
       - name: Lint TypeScript code
         run: nix develop --impure --command pnpm lint
-        working-directory: .
 
       - name: Type check
         run: nix develop --impure --command pnpm check
-        working-directory: .
 
       - name: Run tests
         run: nix develop --impure --command pnpm test:run
-        working-directory: .
 
       - name: Build frontend
         run: nix develop --impure --command pnpm build
-        working-directory: .
