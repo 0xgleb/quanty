@@ -69,11 +69,26 @@ jobs:
       - name: Run Haskell tests
         run: nix develop --impure --command stack test --fast
 
+      - name: Generate OpenAPI spec
+        run: nix develop --impure --command stack exec generate-openapi
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: openapi.json
+
   frontend:
     name: Frontend (TypeScript/Svelte)
     runs-on: ubuntu-latest
+    needs: backend
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download OpenAPI spec
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
 
       - name: Install Nix
         uses: cachix/install-nix-action@v27
@@ -103,9 +118,6 @@ jobs:
 
       - name: Install dependencies
         run: nix develop --impure --command bash -c 'cd frontend && pnpm install'
-
-      - name: Generate OpenAPI spec
-        run: nix develop --impure --command stack exec generate-openapi
 
       - name: Generate TypeScript client
         run: nix develop --impure --command bash -c 'cd frontend && pnpm generate-client'
