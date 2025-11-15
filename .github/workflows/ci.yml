@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  nix-checks:
+    name: Nix Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Check Nix flake
+        run: nix flake check --impure
+
+      - name: Check Nix formatting
+        run: nix develop --impure --command nixfmt --check flake.nix
+
+  backend:
+    name: Backend (Haskell)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Cache Stack artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml', 'package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      - name: Lint Haskell code
+        run: nix develop --impure --command bash -c 'find src app test -name "*.hs" -exec hlint {} +'
+
+      - name: Build Haskell project
+        run: nix develop --impure --command stack build --fast
+
+      - name: Run Haskell tests
+        run: nix develop --impure --command stack test --fast
+
+      - name: Generate OpenAPI spec
+        run: nix develop --impure --command stack exec generate-openapi
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: openapi.json
+
+  frontend:
+    name: Frontend (TypeScript/Svelte)
+    runs-on: ubuntu-latest
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download OpenAPI spec
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://devenv.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(nix develop --impure --command pnpm store path)" >> $GITHUB_ENV
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm install'
+
+      - name: Generate TypeScript client
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm generate-client'
+
+      - name: Check TypeScript formatting
+        run: nix develop --impure --command bash -c 'cd frontend && prettier --check .'
+
+      - name: Lint TypeScript code
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm lint'
+
+      - name: Type check
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm check'
+
+      - name: Run tests
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm test:run'
+
+      - name: Build frontend
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm build'
