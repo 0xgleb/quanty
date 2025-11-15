@@ -104,6 +104,12 @@ jobs:
       - name: Install dependencies
         run: nix develop --impure --command bash -c 'cd frontend && pnpm install'
 
+      - name: Generate OpenAPI spec
+        run: nix develop --impure --command stack exec generate-openapi
+
+      - name: Generate TypeScript client
+        run: nix develop --impure --command bash -c 'cd frontend && pnpm generate-client'
+
       - name: Check TypeScript formatting
         run: nix develop --impure --command bash -c 'cd frontend && prettier --check .'
 
