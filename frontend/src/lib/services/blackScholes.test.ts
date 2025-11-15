@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest"
-import {
-  getErrorMessage,
-  NetworkError,
-  ValidationError,
-  ApiError,
-} from "./blackScholes"
+import { getErrorMessage, NetworkError, ValidationError } from "./blackScholes"
 
 describe("getErrorMessage", () => {
   it("returns generic error message for null", () => {
@@ -32,13 +27,13 @@ describe("getErrorMessage", () => {
     })
   })
 
-  it("returns connection error for NetworkError", () => {
-    const error = new NetworkError({ cause: "Network failure" })
+  it("returns WASM loading error for NetworkError", () => {
+    const error = new NetworkError({ cause: "WASM fetch failed" })
     const result = getErrorMessage(error)
     expect(result).toEqual({
-      title: "Connection Error",
+      title: "WASM Loading Error",
       message:
-        "Unable to connect to the server. Please check your internet connection and try again.",
+        "Failed to load calculation module. Please refresh the page and try again.",
     })
   })
 
@@ -57,42 +52,6 @@ describe("getErrorMessage", () => {
     expect(result).toEqual({
       title: "Validation Error",
       message: "Invalid input provided",
-    })
-  })
-
-  it("returns server error for ApiError with 500 status", () => {
-    const error = new ApiError({ status: 500, message: "Internal error" })
-    const result = getErrorMessage(error)
-    expect(result).toEqual({
-      title: "Server Error",
-      message: "The server encountered an error. Please try again later.",
-    })
-  })
-
-  it("returns server error for ApiError with 503 status", () => {
-    const error = new ApiError({ status: 503, message: "Service unavailable" })
-    const result = getErrorMessage(error)
-    expect(result).toEqual({
-      title: "Server Error",
-      message: "The server encountered an error. Please try again later.",
-    })
-  })
-
-  it("returns specific message for ApiError with 400 status", () => {
-    const error = new ApiError({ status: 400, message: "Bad request" })
-    const result = getErrorMessage(error)
-    expect(result).toEqual({
-      title: "Server Error",
-      message: "Bad request",
-    })
-  })
-
-  it("returns fallback message for ApiError with 400 status and empty message", () => {
-    const error = new ApiError({ status: 400, message: "" })
-    const result = getErrorMessage(error)
-    expect(result).toEqual({
-      title: "Server Error",
-      message: "Invalid request",
     })
   })
 })

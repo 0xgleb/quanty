@@ -2,7 +2,7 @@
   import { createMutation } from "$lib/query.svelte"
   import {
     BlackScholesService,
-    BlackScholesServiceLive,
+    BlackScholesServiceWASM,
   } from "$lib/services/blackScholes"
   import { Effect } from "effect"
   import type { Inputs, OptionKind } from "$lib/api/generated/types.gen"
@@ -54,7 +54,7 @@
 
       const service = yield* BlackScholesService
       return yield* service.calculatePrice(inputs)
-    }).pipe(Effect.provide(BlackScholesServiceLive)),
+    }).pipe(Effect.provide(BlackScholesServiceWASM)),
   )
 
   const handleSubmit = (event: Event) => {
@@ -96,7 +96,7 @@
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
-    integrity="sha384-ZlsGkaTGe72LcQRdHcP5S1MYvfltZaG/vkBXb5WhMPAzP1k8vCPOm8h9Pj1aIkC"
+    integrity="sha384-WcoG4HRXMzYzfCgiyfrySxx90XSl2rxY5mnVY5TwtWE6KLrArNKn0T/mOgNL0Mmi"
     crossorigin="anonymous"
   />
 </svelte:head>

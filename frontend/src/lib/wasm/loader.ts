@@ -1,6 +1,7 @@
 import { Effect } from "effect"
 import { WASMLoadError } from "$lib/errors/wasm"
 import type { Inputs, OptionPrice } from "./types"
+import { WASI } from "@bjorn3/browser_wasi_shim"
 
 export interface WASMInstance {
   readonly calculateBlackScholes: (input: Inputs) => OptionPrice
@@ -11,15 +12,11 @@ export interface WASMInstance {
 
 interface WASMExports {
   readonly memory: WebAssembly.Memory
+  readonly hs_init: () => Promise<void>
   readonly calculateBlackScholes: (input: string) => string
   readonly addNumbers: (x: number, y: number) => number
   readonly doubleValue: (n: number) => number
   readonly helloWasm: () => void
-  readonly rts_schedulerLoop: () => void
-  readonly rts_freeStablePtr: (ptr: number) => void
-  readonly rts_promiseThrowTo: (ptr: number, err: unknown) => void
-  readonly rts_promiseResolveUnit: (ptr: number) => void
-  readonly rts_promiseReject: (ptr: number, err: unknown) => void
 }
 
 type JsffiInit = (exports: WASMExports) => WebAssembly.ModuleImports
@@ -32,19 +29,9 @@ export const loadWASM = (): Effect.Effect<WASMInstance, WASMLoadError> =>
       return cachedInstance
     }
 
-    const wasmModule = yield* Effect.tryPromise({
-      try: () => fetch("/wasm/dist/quanty.wasm"),
-      catch: cause => new WASMLoadError({ cause }),
-    })
-
-    const wasmBytes = yield* Effect.tryPromise({
-      try: () => wasmModule.arrayBuffer(),
-      catch: cause => new WASMLoadError({ cause }),
-    })
-
     const jsffiModule = yield* Effect.tryPromise({
       try: () =>
-        import("/wasm/dist/ghc_wasm_jsffi.js") as Promise<{
+        import("$lib/wasm/ghc_wasm_jsffi.js") as Promise<{
           default: JsffiInit
         }>,
       catch: cause => new WASMLoadError({ cause }),
@@ -52,31 +39,38 @@ export const loadWASM = (): Effect.Effect<WASMInstance, WASMLoadError> =>
 
     const jsffiInit = jsffiModule.default
 
-    const compiled = yield* Effect.tryPromise({
-      try: () => WebAssembly.compile(wasmBytes),
-      catch: cause => new WASMLoadError({ cause }),
-    })
+    const wasi = new WASI([], [], [])
 
-    const { instance } = yield* Effect.tryPromise({
+    const instance = yield* Effect.tryPromise({
       try: async () => {
-        const inst = await WebAssembly.instantiate(compiled, {
-          ghc_wasm_jsffi: {} as WebAssembly.ModuleImports,
+        const response = await fetch("/wasm/dist/quanty.wasm")
+        if (!response.ok) {
+          throw new Error(`Failed to fetch WASM: ${response.statusText}`)
+        }
+
+        const instanceExports: Record<string, unknown> = {}
+
+        const wasmInstance = await WebAssembly.instantiateStreaming(response, {
+          wasi_snapshot_preview1: wasi.wasiImport,
+          ghc_wasm_jsffi: jsffiInit(instanceExports as WASMExports),
         })
-        const exports = inst.exports as unknown as WASMExports
-        const imports = jsffiInit(exports)
-        return WebAssembly.instantiate(compiled, {
-          ghc_wasm_jsffi: imports,
-        })
+
+        Object.assign(instanceExports, wasmInstance.instance.exports)
+
+        wasi.initialize(wasmInstance.instance)
+
+        const exports = instanceExports as unknown as WASMExports
+        await exports.hs_init()
+
+        return exports
       },
       catch: cause => new WASMLoadError({ cause }),
     })
 
-    const exports = instance.exports as unknown as WASMExports
-
     const wrappedInstance: WASMInstance = {
       calculateBlackScholes: (input: Inputs): OptionPrice => {
         const inputJson = JSON.stringify(input)
-        const resultJson = exports.calculateBlackScholes(inputJson)
+        const resultJson = instance.calculateBlackScholes(inputJson)
         const result = JSON.parse(resultJson) as OptionPrice | { error: string }
 
         if ("error" in result) {
@@ -85,9 +79,9 @@ export const loadWASM = (): Effect.Effect<WASMInstance, WASMLoadError> =>
 
         return result
       },
-      addNumbers: (x: number, y: number) => exports.addNumbers(x, y),
-      doubleValue: (n: number) => exports.doubleValue(n),
-      helloWasm: () => exports.helloWasm(),
+      addNumbers: (x: number, y: number) => instance.addNumbers(x, y),
+      doubleValue: (n: number) => instance.doubleValue(n),
+      helloWasm: () => instance.helloWasm(),
     }
 
     cachedInstance = wrappedInstance
